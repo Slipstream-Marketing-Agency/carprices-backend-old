@@ -1,0 +1,39 @@
+const { DataTypes, Model } = require("sequelize");
+const sequelize = require("../util/database");
+
+const Blog = sequelize.define("blog", {
+    title: {
+        type: DataTypes.STRING(75),
+        allowNull: false
+    },
+    metaTitle: {
+        type: DataTypes.STRING(100)
+    },
+    slug: {
+        type: DataTypes.STRING(100),
+        allowNull: false,
+        unique: true
+    },
+    summary: {
+        type: DataTypes.TEXT
+    },
+    published: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+    },
+    publishedAt: {
+        type: DataTypes.DATE
+    },
+    content: {
+        type: DataTypes.TEXT
+    },
+    coverImage: {
+        type: DataTypes.STRING
+    },
+    author: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    }
+});
+
+module.exports = Blog;
