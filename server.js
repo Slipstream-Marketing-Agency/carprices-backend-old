@@ -36,16 +36,24 @@ app.use((req, res, next) => {
 });
 
 // Route files
-const services = require("./routes/common");
+const common = require("./routes/common");
+const trims = require("./routes/trim");
+const models = require("./routes/model");
 const adminBrand = require("./routes/admin/brand");
 const admin = require("./routes/admin");
 const adminBlog = require("./routes/admin/blog");
+const adminModel = require("./routes/admin/model");
+const adminTrim = require("./routes/admin/trim");
 
 // Mount routers
-app.use(services);
+app.use(common);
 app.use(admin);
+app.use("/trim",trims);
+app.use("/model",models);
 app.use("/admin/brand", adminBrand);
 app.use("/admin/blog", adminBlog);
+app.use("/admin/model", adminModel);
+app.use("/admin/trim", adminTrim);
 
 const PORT = process.env.PORT || 8080;
 

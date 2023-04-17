@@ -285,7 +285,7 @@ module.exports.updateBlogCategory = asyncHandler(async (req, res, next) => {
         content
     }, {
         where: {
-            slug: category
+            id: category
         }
     });
 

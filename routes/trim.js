@@ -1,10 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const {
-  getCarBrands,
-} = require("../controllers/common");
 const { protect } = require("../middlewares/auth");
+const { getTrimsByModel } = require("../controllers/trim");
 
-router.route("/brands").get(getCarBrands);
+router.route("/by-model/:model").get(getTrimsByModel);
 
 module.exports = router;
