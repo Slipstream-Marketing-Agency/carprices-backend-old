@@ -39,6 +39,7 @@ app.use((req, res, next) => {
 const common = require("./routes/common");
 const trims = require("./routes/trim");
 const models = require("./routes/model");
+const blogs = require("./routes/blog");
 const adminBrand = require("./routes/admin/brand");
 const admin = require("./routes/admin");
 const adminBlog = require("./routes/admin/blog");
@@ -48,8 +49,9 @@ const adminTrim = require("./routes/admin/trim");
 // Mount routers
 app.use(common);
 app.use(admin);
-app.use("/trim",trims);
-app.use("/model",models);
+app.use("/trim", trims);
+app.use("/model", models);
+app.use("/blog", blogs)
 app.use("/admin/brand", adminBrand);
 app.use("/admin/blog", adminBlog);
 app.use("/admin/model", adminModel);

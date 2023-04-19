@@ -14,6 +14,11 @@ const Blog = sequelize.define("blog", {
         allowNull: false,
         unique: true
     },
+    type: {
+        type: DataTypes.STRING,
+        // values: ["review","news"],
+        defaultValue: "news"
+    },
     summary: {
         type: DataTypes.TEXT
     },

@@ -279,6 +279,462 @@ module.exports.getModels = asyncHandler(async (req, res, next) => {
         .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
 });
 
+module.exports.searchModels = asyncHandler(async (req, res, next) => {
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {
+        published: true
+    };
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        attributes: ["id", "name", "slug"],
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            attributes: ["id", "name", "slug"],
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let models = { rows: [], count: 0 };
+
+    models = await Model.findAndCountAll(conditions);
+
+    // models.rows = await Promise.all(
+    //     models.rows.map(async model => {
+    //         model.brand = await CarBrand.findByPk(model.brand);
+
+
+    //         return model;
+    //     })
+    // )
+
+    res
+        .status(200)
+        .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
+});
+
+module.exports.getModelsByBrandMin = asyncHandler(async (req, res, next) => {
+
+    const { brand } = req.params;
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {
+        brand,
+        published: true
+    };
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        attributes: ["id", "name", "slug"],
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            attributes: ["id", "name", "slug"],
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let models = { rows: [], count: 0 };
+
+    models = await Model.findAndCountAll(conditions);
+
+    res
+        .status(200)
+        .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
+});
+
+module.exports.getModelsByBrand = asyncHandler(async (req, res, next) => {
+
+    const { brand } = req.params;
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {
+        brand,
+        published: true
+    };
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let models = { rows: [], count: 0 };
+
+    models = await Model.findAndCountAll(conditions);
+
+    models.rows = await Promise.all(
+        models.rows.map(async model => {
+            model.brand = await CarBrand.findByPk(model.brand);
+            if (model.highTrim) {
+                model.mainTrim = await Trim.findByPk(model.highTrim);
+                // model.mainTrim.images = await TrimImages.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+                // model.mainTrim.videos = await TrimVideos.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+            } else {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id
+                    }
+                });
+                // if (model.mainTrim) {
+                //     model.mainTrim.images = await TrimImages.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                //     model.mainTrim.videos = await TrimVideos.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                // }
+
+            }
+
+            return model;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
+});
+
+module.exports.getModelsByBrandSlug = asyncHandler(async (req, res, next) => {
+
+    const { brand } = req.params;
+
+    const brandData = await CarBrand.findOne({
+        where: {
+            slug: brand
+        }
+    })
+
+    if (!brandData) {
+        return res.status(404).json({ message: "Brand not found!" })
+    }
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {
+        brand: brandData.id,
+        published: true
+    };
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let models = { rows: [], count: 0 };
+
+    models = await Model.findAndCountAll(conditions);
+
+    models.rows = await Promise.all(
+        models.rows.map(async model => {
+            model.brand = await CarBrand.findByPk(model.brand);
+            if (model.highTrim) {
+                model.mainTrim = await Trim.findByPk(model.highTrim);
+                // model.mainTrim.images = await TrimImages.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+                // model.mainTrim.videos = await TrimVideos.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+            } else {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id
+                    }
+                });
+                // if (model.mainTrim) {
+                //     model.mainTrim.images = await TrimImages.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                //     model.mainTrim.videos = await TrimVideos.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                // }
+
+            }
+
+            return model;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
+});
+
+module.exports.getModelsByBrandAndYear = asyncHandler(async (req, res, next) => {
+
+    const { brand, year } = req.params;
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {
+        brand,
+        year,
+        published: true
+    };
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let models = { rows: [], count: 0 };
+
+    models = await Model.findAndCountAll(conditions);
+
+    models.rows = await Promise.all(
+        models.rows.map(async model => {
+            model.brand = await CarBrand.findByPk(model.brand);
+            if (model.highTrim) {
+                model.mainTrim = await Trim.findByPk(model.highTrim);
+                // model.mainTrim.images = await TrimImages.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+                // model.mainTrim.videos = await TrimVideos.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+            } else {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id
+                    }
+                });
+                // if (model.mainTrim) {
+                //     model.mainTrim.images = await TrimImages.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                //     model.mainTrim.videos = await TrimVideos.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                // }
+
+            }
+
+            return model;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
+});
+
+module.exports.getModelsByBrandAndYearSlug = asyncHandler(async (req, res, next) => {
+
+    const { brand, year } = req.params;
+
+    const brandData = await CarBrand.findOne({
+        where: {
+            slug: brand
+        }
+    })
+
+    if (!brandData) {
+        return res.status(404).json({ message: "Brand not found!" })
+    }
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {
+        brand: brandData.id,
+        year,
+        published: true
+    };
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let models = { rows: [], count: 0 };
+
+    models = await Model.findAndCountAll(conditions);
+
+    models.rows = await Promise.all(
+        models.rows.map(async model => {
+            model.brand = await CarBrand.findByPk(model.brand);
+            if (model.highTrim) {
+                model.mainTrim = await Trim.findByPk(model.highTrim);
+                // model.mainTrim.images = await TrimImages.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+                // model.mainTrim.videos = await TrimVideos.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+            } else {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id
+                    }
+                });
+                // if (model.mainTrim) {
+                //     model.mainTrim.images = await TrimImages.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                //     model.mainTrim.videos = await TrimVideos.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                // }
+
+            }
+
+            return model;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
+});
+
 module.exports.setFeaturedModels = asyncHandler(async (req, res, next) => {
 
     const {
@@ -691,6 +1147,211 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
     res
         .status(200)
         .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
+});
+
+module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
+
+    const { model: slug } = req.params;
+
+    let where = {
+        slug
+    };
+
+    const model = await Model.findOne({ where, raw: true });
+
+    if (!model) {
+        return res.status(404).json({
+            message: "Model not found"
+        })
+    }
+
+    model.brand = await CarBrand.findByPk(model.brand);
+    if (model.highTrim) {
+        model.mainTrim = await Trim.findByPk(model.highTrim);
+        model.mainTrim.images = await TrimImages.findAll({
+            where: {
+                trimId: model.mainTrim.id
+            }
+        })
+        model.mainTrim.videos = await TrimVideos.findAll({
+            where: {
+                trimId: model.mainTrim.id
+            }
+        })
+    } else {
+        model.mainTrim = await Trim.findOne({
+            where: {
+                model: model.id
+            }
+        });
+        if (model.mainTrim) {
+            model.mainTrim.images = await TrimImages.findAll({
+                where: {
+                    trimId: model.mainTrim?.id
+                }
+            })
+            model.mainTrim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: model.mainTrim?.id
+                }
+            })
+        }
+
+    }
+
+    model.trims = await Trim.findAll({
+        where: {
+            model: model.id
+        },
+        raw: true
+    });
+
+    model.trims = await Promise.all(
+        model.trims.map(async trim => {
+            trim.images = await TrimImages.findAll({
+                where: {
+                    trimId: trim?.id
+                }
+            })
+            trim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: trim?.id
+                }
+            })
+            return trim;
+        })
+    )
+
+
+
+
+    res
+        .status(200)
+        .json({ model });
+});
+
+module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
+
+    let pageSize = 8;
+    let currentPage = 1;
+    let where = {
+        published: true,
+        id: [1, 2, 4]
+    };
+
+    let conditions = {
+        where,
+        limit: pageSize,
+        offset: (currentPage - 1) * pageSize,
+        // order: orderBy,
+        raw: true
+    }
+
+    let models = { rows: [], count: 0 };
+
+    models = await Model.findAndCountAll(conditions);
+
+    models.rows = await Promise.all(
+        models.rows.map(async model => {
+            model.brand = await CarBrand.findByPk(model.brand);
+            if (model.highTrim) {
+                model.mainTrim = await Trim.findByPk(model.highTrim);
+                // model.mainTrim.images = await TrimImages.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+                // model.mainTrim.videos = await TrimVideos.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+            } else {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id
+                    }
+                });
+                // if (model.mainTrim) {
+                //     model.mainTrim.images = await TrimImages.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                //     model.mainTrim.videos = await TrimVideos.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                // }
+
+            }
+
+            return model;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models: models.rows, });
+});
+
+module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
+
+    const compareListIds = [{ v1: 1, v2: 2 }, { v1: 1, v2: 2 }, { v1: 1, v2: 2 }]
+
+    let models = []
+
+    await Promise.all(
+        compareListIds.map(async items => {
+            let v1 = await Model.findOne({
+                where: {
+                    id: items.v1
+                },
+                raw: true
+            })
+            if (v1) {
+                v1.brand = await CarBrand.findByPk(v1.brand);
+                if (v1.highTrim) {
+                    v1.mainTrim = await Trim.findByPk(v1.highTrim);
+                } else {
+                    v1.mainTrim = await Trim.findOne({
+                        where: {
+                            v1: v1.id
+                        }
+                    });
+
+                }
+            }
+
+            let v2 = await Model.findOne({
+                where: {
+                    id: items.v2
+                },
+                raw: true
+            })
+            if (v2) {
+                v2.brand = await CarBrand.findByPk(v2.brand);
+                if (v2.highTrim) {
+                    v2.mainTrim = await Trim.findByPk(v2.highTrim);
+                } else {
+                    v2.mainTrim = await Trim.findOne({
+                        where: {
+                            v1: v2.id
+                        }
+                    });
+
+                }
+            }
+
+
+            models.push({v1, v2})
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models: models, });
 });
 
 const fieldValidation = (field, next) => {

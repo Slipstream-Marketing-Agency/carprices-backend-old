@@ -148,7 +148,7 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
                 raw: true
             });
             blog.brands = await Promise.all(
-                blog.brands.map(async brand=>{
+                blog.brands.map(async brand => {
                     brand = await CarBrand.findByPk(brand.brandId);
                     return brand;
                 })
@@ -160,7 +160,7 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
                 raw: true
             });
             blog.categories = await Promise.all(
-                blog.categories.map(async category=>{
+                blog.categories.map(async category => {
                     category = await Category.findByPk(category.categoryId);
                     return category;
                 })
@@ -172,7 +172,7 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
                 raw: true
             });
             blog.models = await Promise.all(
-                blog.models.map(async model=>{
+                blog.models.map(async model => {
                     model = await Model.findByPk(model.modelId);
                     return model;
                 })
@@ -184,7 +184,7 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
                 raw: true
             });
             blog.tags = await Promise.all(
-                blog.tags.map(async tag=>{
+                blog.tags.map(async tag => {
                     tag = await Tag.findByPk(tag.tagId);
                     return tag;
                 })
@@ -192,11 +192,286 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
             return blog;
         })
     )
-    
 
-        res
-            .status(200)
-            .json({ blogs: blogs.rows, blogsCount: blogs.count, totalPage: Math.ceil(blogs.count / pageSize) });
+
+    res
+        .status(200)
+        .json({ blogs: blogs.rows, blogsCount: blogs.count, totalPage: Math.ceil(blogs.count / pageSize) });
+});
+
+module.exports.getBlogs = asyncHandler(async (req, res, next) => {
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {
+        published: true
+    };
+    if (query.search) {
+        where.title = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let blogs = { rows: [], count: 0 };
+
+    blogs = await Blog.findAndCountAll(conditions);
+
+    blogs.rows = await Promise.all(
+        blogs.rows.map(async blog => {
+            blog.brands = await BlogBrand.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.brands = await Promise.all(
+                blog.brands.map(async brand => {
+                    brand = await CarBrand.findByPk(brand.brandId);
+                    return brand;
+                })
+            )
+            blog.categories = await BlogCategory.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.categories = await Promise.all(
+                blog.categories.map(async category => {
+                    category = await Category.findByPk(category.categoryId);
+                    return category;
+                })
+            )
+            blog.models = await BlogModel.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.models = await Promise.all(
+                blog.models.map(async model => {
+                    model = await Model.findByPk(model.modelId);
+                    return model;
+                })
+            )
+            blog.tags = await BlogTag.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.tags = await Promise.all(
+                blog.tags.map(async tag => {
+                    tag = await Tag.findByPk(tag.tagId);
+                    return tag;
+                })
+            )
+            return blog;
+        })
+    )
+
+
+    res
+        .status(200)
+        .json({ blogs: blogs.rows, blogsCount: blogs.count, totalPage: Math.ceil(blogs.count / pageSize) });
+});
+
+module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
+
+    const { model } = req.params;
+    const { query } = req;
+
+    let blogsByModel = await BlogModel.findAll(
+        {
+            where: {
+                modelId: model
+            },
+            raw: true
+        }
+    )
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+
+    let blogIds = blogsByModel.map(blog => {
+        return blog.blogId
+    })
+
+    let where = {
+        id: blogIds,
+        published: true
+    };
+    if (query.search) {
+        where.title = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let blogs = { rows: [], count: 0 };
+
+    blogs = await Blog.findAndCountAll(conditions);
+
+    blogs.rows = await Promise.all(
+        blogs.rows.map(async blog => {
+            blog.brands = await BlogBrand.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.brands = await Promise.all(
+                blog.brands.map(async brand => {
+                    brand = await CarBrand.findByPk(brand.brandId);
+                    return brand;
+                })
+            )
+            blog.categories = await BlogCategory.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.categories = await Promise.all(
+                blog.categories.map(async category => {
+                    category = await Category.findByPk(category.categoryId);
+                    return category;
+                })
+            )
+            blog.models = await BlogModel.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.models = await Promise.all(
+                blog.models.map(async model => {
+                    model = await Model.findByPk(model.modelId);
+                    return model;
+                })
+            )
+            blog.tags = await BlogTag.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.tags = await Promise.all(
+                blog.tags.map(async tag => {
+                    tag = await Tag.findByPk(tag.tagId);
+                    return tag;
+                })
+            )
+            return blog;
+        })
+    )
+
+
+    res
+        .status(200)
+        .json({ blogs: blogs.rows, blogsCount: blogs.count, totalPage: Math.ceil(blogs.count / pageSize) });
+});
+
+module.exports.getBlogBySlug = asyncHandler(async (req, res, next) => {
+
+    const { slug } = req.params;
+
+    let where = {
+        published: true,
+        slug
+    };
+
+    const blog = await Blog.findOne({ where, raw: true });
+
+
+    blog.brands = await BlogBrand.findAll({
+        where: {
+            blogId: blog.id
+        },
+        raw: true
+    });
+    blog.brands = await Promise.all(
+        blog.brands.map(async brand => {
+            brand = await CarBrand.findByPk(brand.brandId);
+            return brand;
+        })
+    )
+    blog.categories = await BlogCategory.findAll({
+        where: {
+            blogId: blog.id
+        },
+        raw: true
+    });
+    blog.categories = await Promise.all(
+        blog.categories.map(async category => {
+            category = await Category.findByPk(category.categoryId);
+            return category;
+        })
+    )
+    blog.models = await BlogModel.findAll({
+        where: {
+            blogId: blog.id
+        },
+        raw: true
+    });
+    blog.models = await Promise.all(
+        blog.models.map(async model => {
+            model = await Model.findByPk(model.modelId);
+            return model;
+        })
+    )
+    blog.tags = await BlogTag.findAll({
+        where: {
+            blogId: blog.id
+        },
+        raw: true
+    });
+    blog.tags = await Promise.all(
+        blog.tags.map(async tag => {
+            tag = await Tag.findByPk(tag.tagId);
+            return tag;
+        })
+    )
+
+
+    res
+        .status(200)
+        .json({ blog });
 });
 
 module.exports.createBlogCategory = asyncHandler(async (req, res, next) => {

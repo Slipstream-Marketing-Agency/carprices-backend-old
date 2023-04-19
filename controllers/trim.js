@@ -491,6 +491,203 @@ module.exports.getTrimsByModel = asyncHandler(async (req, res, next) => {
         .json({ trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize) });
 });
 
+module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
+
+    const { trim: slug } = req.params;
+
+    let where = {
+        slug
+    };
+    
+
+    let trim = await Trim.findOne({ where, raw: true});
+
+    if (!trim) {
+        return res.status(404).json({
+            message: "Trim not found"
+        })
+    }
+
+    trim.brand = await CarBrand.findByPk(trim.brand);
+    trim.model = await Model.findByPk(trim.model, {
+        // attributes: ["id", "name"]
+    });
+    trim.images = await TrimImages.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+    trim.videos = await TrimVideos.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+
+
+    res
+        .status(200)
+        .json({ trim });
+});
+
+module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
+
+    const { trim: slug } = req.params;
+
+    let where = {
+        slug
+    };
+    
+
+    let trim = await Trim.findOne({ where, raw: true});
+
+    if (!trim) {
+        return res.status(404).json({
+            message: "Trim not found"
+        })
+    }
+
+    trim.brand = await CarBrand.findByPk(trim.brand);
+    trim.model = await Model.findByPk(trim.model, {
+        // attributes: ["id", "name"]
+    });
+    trim.images = await TrimImages.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+    trim.videos = await TrimVideos.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+
+
+    res
+        .status(200)
+        .json({ trim });
+});
+
+module.exports.getTrimsBySlugAndYear = asyncHandler(async (req, res, next) => {
+
+    const { trim: slug, year } = req.params;
+
+    let where = {
+        slug,
+        year
+    };
+    
+
+    let trim = await Trim.findOne({ where, raw: true});
+
+    if (!trim) {
+        return res.status(404).json({
+            message: "Trim not found"
+        })
+    }
+
+    trim.brand = await CarBrand.findByPk(trim.brand);
+    trim.model = await Model.findByPk(trim.model, {
+        // attributes: ["id", "name"]
+    });
+    trim.images = await TrimImages.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+    trim.videos = await TrimVideos.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+
+
+    res
+        .status(200)
+        .json({ trim });
+});
+
+module.exports.getTrimsYearByModel = asyncHandler(async (req, res, next) => {
+
+    const { modelId } = req.params;
+
+    const trims = await Trim.findAll({
+        attributes: ['year'],
+        group: ['year'],
+        where: {
+            model: modelId
+        }
+        
+    });
+
+
+    res
+        .status(200)
+        .json({ trimYears: trims });
+});
+
+module.exports.getTrimMinMaxFilterPrice = asyncHandler(async (req, res, next) => {
+
+    const { query } = req;
+
+    let where = {};
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    const min = await Trim.min("price",{
+        where
+        
+    });
+
+    const max = await Trim.max("price",{
+        where
+        
+    });
+
+
+    res
+        .status(200)
+        .json({ min, max });
+});
+
+
 const fieldValidation = (field, next) => {
     if (!field) {
         return new ErrorResponse(`Missing fields`, 400);
