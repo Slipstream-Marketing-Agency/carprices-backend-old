@@ -48,7 +48,7 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
         haveAdaptiveCuriseControl,
         haveLaneChangeAssist,
         bodyType,
-        haveFrontBrakes,
+        frontBrakes,
         haveRearBrakes,
         length,
         width,
@@ -85,10 +85,11 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
 
     fieldValidation(name, next);
     fieldValidation(brand, next);
+    fieldValidation(model, next);
     fieldValidation(year, next);
     fieldValidation(isElectric, next);
 
-    const slug = slugify(name, {
+    const slug = slugify(name , {
         lower: true
     });
 
@@ -128,7 +129,7 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
         haveAdaptiveCuriseControl,
         haveLaneChangeAssist,
         bodyType,
-        haveFrontBrakes,
+        frontBrakes,
         haveRearBrakes,
         length,
         width,
@@ -279,7 +280,7 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
         haveAdaptiveCuriseControl,
         haveLaneChangeAssist,
         bodyType,
-        haveFrontBrakes,
+        frontBrakes,
         haveRearBrakes,
         length,
         width,
@@ -359,7 +360,7 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
         haveAdaptiveCuriseControl,
         haveLaneChangeAssist,
         bodyType,
-        haveFrontBrakes,
+        frontBrakes,
         haveRearBrakes,
         length,
         width,

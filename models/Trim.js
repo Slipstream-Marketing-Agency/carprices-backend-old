@@ -12,7 +12,7 @@ const Trim = sequelize.define("trim", {
     slug: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+        // unique: true
     },
     description: {
         type: DataTypes.TEXT
@@ -35,7 +35,7 @@ const Trim = sequelize.define("trim", {
     },
     featuredImage: {
         type: DataTypes.STRING,
-        allowNull: false,
+        // allowNull: false,
     },
     engine: {
         type: DataTypes.STRING,
@@ -118,8 +118,8 @@ const Trim = sequelize.define("trim", {
     bodyType: {
         type: DataTypes.STRING,
     },
-    haveFrontBrakes: {
-        type: DataTypes.BOOLEAN,
+    frontBrakes: {
+        type: DataTypes.STRING,
     },
     rearBrakes: {
         type: DataTypes.STRING,

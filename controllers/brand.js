@@ -24,6 +24,8 @@ module.exports.createBrand = asyncHandler(async (req, res, next) => {
         name,
         image,
         slug
+    }).catch( err => {
+        console.log("error ", err);
     });
 
     await redisClient.del("brands");

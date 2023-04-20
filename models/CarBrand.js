@@ -9,6 +9,7 @@ const CarBrand = sequelize.define("car_brand", {
   slug: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true
   },
   image: {
     type: DataTypes.STRING,
