@@ -160,10 +160,12 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
     }
 
     let conditions = {
+        attributes: {exclude: ['content']},
         raw: true
     };
     if (!isAll) {
         conditions = {
+            attributes: {exclude: ['content']},
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,
@@ -244,11 +246,13 @@ module.exports.getBlogs = asyncHandler(async (req, res, next) => {
 
     let pageSize = query.pageSize ?? 10;
     let currentPage = query.currentPage ?? 1;
+    let type = query.type ?? "news";
     let orderBy = query.orderBy ? [
         [query.orderBy, "ASC"]
     ] : null;
     let where = {
-        published: true
+        published: true,
+        type
     };
     if (query.search) {
         where.title = { [Op.iLike]: `%${query.search}%` }
@@ -256,10 +260,12 @@ module.exports.getBlogs = asyncHandler(async (req, res, next) => {
 
     let conditions = {
         raw: true,
+        attributes: {exclude: ['content']},
         where
     };
     if (!isAll) {
         conditions = {
+            attributes: {exclude: ['content']},
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,
