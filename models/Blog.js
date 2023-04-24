@@ -3,14 +3,14 @@ const sequelize = require("../util/database");
 
 const Blog = sequelize.define("blog", {
     title: {
-        type: DataTypes.STRING(75),
+        type: DataTypes.STRING,
         allowNull: false
     },
     metaTitle: {
-        type: DataTypes.STRING(100)
+        type: DataTypes.STRING
     },
     slug: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING,
         allowNull: false,
         unique: true
     },

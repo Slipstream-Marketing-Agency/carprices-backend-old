@@ -15,7 +15,7 @@ require('dotenv').config()
 const app = express();
 
 // Body parser
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));

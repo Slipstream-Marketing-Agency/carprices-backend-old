@@ -1317,7 +1317,7 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
                 } else {
                     v1.mainTrim = await Trim.findOne({
                         where: {
-                            v1: v1.id
+                            model: v1.id
                         }
                     });
 
@@ -1337,7 +1337,7 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
                 } else {
                     v2.mainTrim = await Trim.findOne({
                         where: {
-                            v1: v2.id
+                            model: v2.id
                         }
                     });
 

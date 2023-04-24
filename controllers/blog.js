@@ -14,9 +14,10 @@ const BlogModel = require("../models/BlogModel");
 const Tag = require("../models/Tag");
 const BlogTag = require("../models/BlogTag");
 const Model = require("../models/Model");
+const Admin = require("../models/Admin");
 
 module.exports.createBlog = asyncHandler(async (req, res, next) => {
-    const {
+    let {
         title,
         metaTitle,
         summary,
@@ -26,7 +27,12 @@ module.exports.createBlog = asyncHandler(async (req, res, next) => {
         brands,
         categories,
         models,
-        tags
+        tags,
+        type,
+        slug,
+        publishedAt,
+        // authorFirst,
+        // authorLast
     } = req.body.blog;
 
     fieldValidation(title, next);
@@ -34,15 +40,45 @@ module.exports.createBlog = asyncHandler(async (req, res, next) => {
     fieldValidation(content, next);
     fieldValidation(published, next);
 
-    const slug = slugify(title, {
-        lower: true
-    });
+    if (!slug) {
+        slug = slugify(title, {
+            lower: true
+        });
+    }
 
-    let publishedAt = null
+
+    // let publishedAt = null
 
     if (published) {
         publishedAt = new Date()
+    } else {
+        publishedAt = null
     }
+
+    // Admin.findOrCreate({
+
+    // }, {
+    //     email: authorFirst + "@carprices.ae",
+    //     password: "Test123",
+    //     username: authorFirst,
+    //     firstName: authorFirst,
+    //     lastName: authorLast
+    // });
+
+    // const [row, created] = await Admin.findOrCreate({
+    //     where: {
+    //         email: authorFirst + "@carprices.ae",
+    //     },
+    //     defaults: {
+    //         email: authorFirst + "@carprices.ae",
+    //         password: "Test123",
+    //         username: authorFirst,
+    //         firstName: authorFirst,
+    //         lastName: authorLast
+    //     }
+    // });
+
+    // let authorId = row.id
 
     try {
         const blog = await Blog.create({
@@ -54,7 +90,8 @@ module.exports.createBlog = asyncHandler(async (req, res, next) => {
             publishedAt,
             coverImage,
             content,
-            author: req.loggedAdmin.id
+            type,
+            author: req.loggedAdmin.id //authorId//
         })
 
         let blogBrands = brands.map(brand => ({ blogId: blog.id, brandId: brand }));
