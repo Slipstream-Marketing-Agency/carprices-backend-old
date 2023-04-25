@@ -160,12 +160,12 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
     }
 
     let conditions = {
-        attributes: {exclude: ['content']},
+        attributes: { exclude: ['content'] },
         raw: true
     };
     if (!isAll) {
         conditions = {
-            attributes: {exclude: ['content']},
+            attributes: { exclude: ['content'] },
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,
@@ -260,12 +260,12 @@ module.exports.getBlogs = asyncHandler(async (req, res, next) => {
 
     let conditions = {
         raw: true,
-        attributes: {exclude: ['content']},
+        attributes: { exclude: ['content'] },
         where
     };
     if (!isAll) {
         conditions = {
-            attributes: {exclude: ['content']},
+            attributes: { exclude: ['content'] },
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,
@@ -356,6 +356,7 @@ module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
 
     let pageSize = query.pageSize ?? 10;
     let currentPage = query.currentPage ?? 1;
+    let type = query.type ?? "news";
     let orderBy = query.orderBy ? [
         [query.orderBy, "ASC"]
     ] : null;
@@ -364,8 +365,192 @@ module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
         return blog.blogId
     })
 
+    let modelData = await Model.findByPk(model, {
+        attributes: ["name"],
+        raw: true
+    });
+
+    console.log("modelData ", modelData);
+
+    let categoryData = await Category.findOne({
+        where: {
+            title: {
+                [Op.iLike]: "%"+modelData.name+"%"
+            },
+        },
+        raw: true
+    })
+
+    
+    console.log('categories ', categoryData);
+
+    if (categoryData) {
+        let blogsByCategory = await BlogCategory.findAll(
+            {
+                where: {
+                    categoryId: categoryData.id
+                },
+                raw: true
+            }
+        )
+        console.log("blogsByCategory ", blogsByCategory);
+        blogsByCategory.map(item => {
+            blogIds.push(item.blogId)
+        })
+    }
+
+
     let where = {
         id: blogIds,
+        type,
+        published: true
+    };
+    if (query.search) {
+        where.title = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let blogs = { rows: [], count: 0 };
+
+    blogs = await Blog.findAndCountAll(conditions);
+
+    blogs.rows = await Promise.all(
+        blogs.rows.map(async blog => {
+            blog.brands = await BlogBrand.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.brands = await Promise.all(
+                blog.brands.map(async brand => {
+                    brand = await CarBrand.findByPk(brand.brandId);
+                    return brand;
+                })
+            )
+            blog.categories = await BlogCategory.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.categories = await Promise.all(
+                blog.categories.map(async category => {
+                    category = await Category.findByPk(category.categoryId);
+                    return category;
+                })
+            )
+            blog.models = await BlogModel.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.models = await Promise.all(
+                blog.models.map(async model => {
+                    model = await Model.findByPk(model.modelId);
+                    return model;
+                })
+            )
+            blog.tags = await BlogTag.findAll({
+                where: {
+                    blogId: blog.id
+                },
+                raw: true
+            });
+            blog.tags = await Promise.all(
+                blog.tags.map(async tag => {
+                    tag = await Tag.findByPk(tag.tagId);
+                    return tag;
+                })
+            )
+            return blog;
+        })
+    )
+
+
+    res
+        .status(200)
+        .json({ blogs: blogs.rows, blogsCount: blogs.count, totalPage: Math.ceil(blogs.count / pageSize) });
+});
+
+module.exports.getBlogsByBrand = asyncHandler(async (req, res, next) => {
+
+    const { brand } = req.params;
+    const { query } = req;
+
+    let blogsByBrand = await BlogBrand.findAll(
+        {
+            where: {
+                brandId: brand
+            },
+            raw: true
+        }
+    )
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let type = query.type ?? "news";
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+
+    let blogIds = blogsByBrand.map(blog => {
+        return blog.blogId
+    })
+
+    let brandData = await CarBrand.findByPk(brand, {
+        attributes: ["name"],
+        raw: true
+    });
+
+    console.log("brandData ", brandData);
+
+    let categoryData = await Category.findOne({
+        where: {
+            title: {
+                [Op.iLike]: "%"+brandData.name+"%"
+            },
+        },
+        raw: true
+    })
+
+    
+    console.log('categories ', categoryData);
+
+    if (categoryData) {
+        let blogsByCategory = await BlogCategory.findAll(
+            {
+                where: {
+                    categoryId: categoryData.id
+                },
+                raw: true
+            }
+        )
+        console.log("blogsByCategory ", blogsByCategory);
+        blogsByCategory.map(item => {
+            blogIds.push(item.blogId)
+        })
+    }
+
+    let where = {
+        id: blogIds,
+        type,
         published: true
     };
     if (query.search) {

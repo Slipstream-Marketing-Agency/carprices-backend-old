@@ -89,7 +89,7 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
     fieldValidation(year, next);
     fieldValidation(isElectric, next);
 
-    const slug = slugify(name , {
+    const slug = slugify(name, {
         lower: true
     });
 
@@ -499,9 +499,9 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
     let where = {
         slug
     };
-    
 
-    let trim = await Trim.findOne({ where, raw: true});
+
+    let trim = await Trim.findOne({ where, raw: true });
 
     if (!trim) {
         return res.status(404).json({
@@ -524,6 +524,14 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
         }
     })
 
+    trim.allYearMainTrims = await Trim.findAll({
+        attributes: ["id","name","year", "featuredImage", "slug"],
+        where: {
+            model: trim.model,
+            slug: trim.slug
+        }
+    });
+
 
     res
         .status(200)
@@ -537,9 +545,9 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
     let where = {
         slug
     };
-    
 
-    let trim = await Trim.findOne({ where, raw: true});
+
+    let trim = await Trim.findOne({ where, raw: true });
 
     if (!trim) {
         return res.status(404).json({
@@ -576,9 +584,9 @@ module.exports.getTrimsBySlugAndYear = asyncHandler(async (req, res, next) => {
         slug,
         year
     };
-    
 
-    let trim = await Trim.findOne({ where, raw: true});
+
+    let trim = await Trim.findOne({ where, raw: true });
 
     if (!trim) {
         return res.status(404).json({
@@ -607,6 +615,59 @@ module.exports.getTrimsBySlugAndYear = asyncHandler(async (req, res, next) => {
         .json({ trim });
 });
 
+module.exports.getTrimsBySlugAndYearWithModel = asyncHandler(async (req, res, next) => {
+
+    const { trim: slug, model, year } = req.params;
+
+    let modelData = await Model.findOne({
+        where: {
+            slug: model
+        }
+    })
+
+    let where = {
+        slug,
+        model: modelData.id,
+        year
+    };
+
+
+    let trim = await Trim.findOne({ where, raw: true });
+
+    if (!trim) {
+        return res.status(404).json({
+            message: "Trim not found"
+        })
+    }
+
+    trim.brand = await CarBrand.findByPk(trim.brand);
+    trim.model = await Model.findByPk(trim.model, {
+        // attributes: ["id", "name"]
+    });
+    trim.images = await TrimImages.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+    trim.videos = await TrimVideos.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+    
+    trim.allYearMainTrims = await Trim.findAll({
+        attributes: ["id","name","year", "featuredImage", "slug"],
+        where: {
+            model: modelData.id,
+            slug: trim.slug
+        }
+    });
+
+    res
+        .status(200)
+        .json({ trim });
+});
+
 module.exports.getTrimsYearByModel = asyncHandler(async (req, res, next) => {
 
     const { modelId } = req.params;
@@ -617,7 +678,7 @@ module.exports.getTrimsYearByModel = asyncHandler(async (req, res, next) => {
         where: {
             model: modelId
         }
-        
+
     });
 
 
@@ -672,20 +733,255 @@ module.exports.getTrimMinMaxFilterPrice = asyncHandler(async (req, res, next) =>
         where.isElectric = true
     }
 
-    const min = await Trim.min("price",{
+    const min = await Trim.min("price", {
         where
-        
+
     });
 
-    const max = await Trim.max("price",{
+    const max = await Trim.max("price", {
         where
-        
+
     });
 
 
     res
         .status(200)
         .json({ min, max });
+});
+
+module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
+
+    const { query } = req;
+
+    let where = {};
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    where.price = {}
+
+    if (query.min) {
+        where.price = {
+            ...where.price,
+            [Op.gte]: query.min
+        }
+    }
+
+    if (query.max) {
+        where.price = {
+            ...where.price,
+            [Op.lte]: query.max
+        }
+    }
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let trims = { rows: [], count: 0 };
+
+    trims = await Trim.findAndCountAll(conditions);
+
+    trims.rows = await Promise.all(
+        trims.rows.map(async trim => {
+            trim.brand = await CarBrand.findByPk(trim.brand);
+            trim.model = await Model.findByPk(trim.model, {
+                attributes: ["id", "name"]
+            });
+            trim.images = await TrimImages.findAll({
+                where: {
+                    trimId: trim.id
+                }
+            })
+            trim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: trim.id
+                }
+            })
+            return trim;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize) });
+});
+
+module.exports.getTrimsBodyType = asyncHandler(async (req, res, next) => {
+
+    let bodyType = await Trim.findAll({
+        attributes: ['bodyType'],
+        group: ['bodyType']
+    });
+
+    bodyType = bodyType.map(item => item.bodyType)
+
+    res
+        .status(200)
+        .json({ bodyType });
+});
+
+module.exports.getTrimsFuelType = asyncHandler(async (req, res, next) => {
+
+    let fuelType = await Trim.findAll({
+        attributes: ['fuelType'],
+        group: ['fuelType']
+    });
+
+    fuelType = fuelType.map(item => item.fuelType)
+
+    res
+        .status(200)
+        .json({ fuelType });
+});
+
+module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) => {
+
+    const { body, query } = req;
+
+    let where = {};
+
+    where.price = {}
+
+    if (body.min) {
+        where.price = {
+            ...where.price,
+            [Op.gte]: body.min
+        }
+    }
+
+    if (body.max) {
+        where.price = {
+            ...where.price,
+            [Op.lte]: body.max
+        }
+    }
+
+    if (body.brand) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission) {
+        where.transmission = body.transmission
+    }
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let trims = { rows: [], count: 0 };
+
+    trims = await Trim.findAndCountAll(conditions);
+
+    trims.rows = await Promise.all(
+        trims.rows.map(async trim => {
+            trim.brand = await CarBrand.findByPk(trim.brand);
+            trim.model = await Model.findByPk(trim.model, {
+                attributes: ["id", "name"]
+            });
+            trim.images = await TrimImages.findAll({
+                where: {
+                    trimId: trim.id
+                }
+            })
+            trim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: trim.id
+                }
+            })
+            return trim;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize) });
 });
 
 
