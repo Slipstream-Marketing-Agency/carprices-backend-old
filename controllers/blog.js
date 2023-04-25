@@ -55,8 +55,10 @@ module.exports.createBlog = asyncHandler(async (req, res, next) => {
         publishedAt = null
     }
 
-    // Admin.findOrCreate({
+    // console.log(publishedAt);
 
+    // Admin.findOrCreate({
+    //     email: authorFirst + "@carprices.ae",
     // }, {
     //     email: authorFirst + "@carprices.ae",
     //     password: "Test123",
@@ -91,7 +93,7 @@ module.exports.createBlog = asyncHandler(async (req, res, next) => {
             coverImage,
             content,
             type,
-            author: req.loggedAdmin.id //authorId//
+            author: req.loggedAdmin.id //authorId// 
         })
 
         let blogBrands = brands.map(brand => ({ blogId: blog.id, brandId: brand }));
@@ -153,7 +155,9 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
     let currentPage = query.currentPage ?? 1;
     let orderBy = query.orderBy ? [
         [query.orderBy, "ASC"]
-    ] : null;
+    ] : [
+        ["publishedAt", "DESC"]
+    ];
     let where = {};
     if (query.search) {
         where.title = { [Op.iLike]: `%${query.search}%` }
@@ -249,7 +253,9 @@ module.exports.getBlogs = asyncHandler(async (req, res, next) => {
     let type = query.type ?? "news";
     let orderBy = query.orderBy ? [
         [query.orderBy, "ASC"]
-    ] : null;
+    ] : [
+        ["publishedAt", "DESC"]
+    ];
     let where = {
         published: true,
         type
@@ -359,7 +365,9 @@ module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
     let type = query.type ?? "news";
     let orderBy = query.orderBy ? [
         [query.orderBy, "ASC"]
-    ] : null;
+    ] : [
+        ["publishedAt", "DESC"]
+    ];
 
     let blogIds = blogsByModel.map(blog => {
         return blog.blogId
@@ -370,8 +378,6 @@ module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
         raw: true
     });
 
-    console.log("modelData ", modelData);
-
     let categoryData = await Category.findOne({
         where: {
             title: {
@@ -380,9 +386,6 @@ module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
         },
         raw: true
     })
-
-    
-    console.log('categories ', categoryData);
 
     if (categoryData) {
         let blogsByCategory = await BlogCategory.findAll(
@@ -393,7 +396,6 @@ module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
                 raw: true
             }
         )
-        console.log("blogsByCategory ", blogsByCategory);
         blogsByCategory.map(item => {
             blogIds.push(item.blogId)
         })
@@ -508,7 +510,9 @@ module.exports.getBlogsByBrand = asyncHandler(async (req, res, next) => {
     let type = query.type ?? "news";
     let orderBy = query.orderBy ? [
         [query.orderBy, "ASC"]
-    ] : null;
+    ] : [
+        ["publishedAt", "DESC"]
+    ];
 
     let blogIds = blogsByBrand.map(blog => {
         return blog.blogId
@@ -519,8 +523,6 @@ module.exports.getBlogsByBrand = asyncHandler(async (req, res, next) => {
         raw: true
     });
 
-    console.log("brandData ", brandData);
-
     let categoryData = await Category.findOne({
         where: {
             title: {
@@ -529,9 +531,6 @@ module.exports.getBlogsByBrand = asyncHandler(async (req, res, next) => {
         },
         raw: true
     })
-
-    
-    console.log('categories ', categoryData);
 
     if (categoryData) {
         let blogsByCategory = await BlogCategory.findAll(

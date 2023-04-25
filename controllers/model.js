@@ -1360,7 +1360,7 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
 
 module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
 
-    const compareListIds = [{ v1: 1, v2: 2 }, { v1: 1, v2: 2 }, { v1: 1, v2: 2 }]
+    const compareListIds = [{ v1: 1, v2: 2 }, { v1: 3, v2: 4 }, { v1: 5, v2: 6 }]
 
     let models = []
 
