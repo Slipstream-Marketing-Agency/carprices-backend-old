@@ -78,6 +78,12 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
         isSpacious,
         isElectric,
         euroNcap,
+        power,
+        gearBox,
+        haveRearParkAssist,
+        airbags,
+        doors,
+        wheels,
         published,
         images,
         videos
@@ -92,6 +98,20 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
     const slug = slugify(name, {
         lower: true
     });
+
+    let brandData = await CarBrand.findOne({
+        where: {
+            id: brand
+        }
+    })
+
+    let modelData = await Model.findOne({
+        where: {
+            id: model
+        }
+    })
+
+    let mainSlug = `${year}-${brandData.slug}-${modelData.slug}-${slug}`
 
     const trim = await Trim.create({
         name,
@@ -160,7 +180,14 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
         isElectric,
         euroNcap,
         published,
-        slug
+        slug,
+        mainSlug,
+        power,
+        gearBox,
+        haveRearParkAssist,
+        airbags,
+        doors,
+        wheels,
     });
 
     const trimImages = images.map((image) => ({
@@ -310,6 +337,14 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
         isSpacious,
         isElectric,
         euroNcap,
+        power,
+        gearBox,
+        haveRearParkAssist,
+        airbags,
+        doors,
+        wheels,
+        slug,
+        mainSlug,
         published,
         images,
         videos
@@ -319,10 +354,6 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
     fieldValidation(brand, next);
     fieldValidation(year, next);
     fieldValidation(isElectric, next);
-
-    const slug = slugify(name, {
-        lower: true
-    });
 
     await Trim.update({
         name,
@@ -391,7 +422,14 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
         isElectric,
         euroNcap,
         published,
-        slug
+        power,
+        gearBox,
+        haveRearParkAssist,
+        airbags,
+        doors,
+        wheels,
+        slug,
+        mainSlug,
     }, {
         where: {
             id: trim

@@ -14,6 +14,11 @@ const Trim = sequelize.define("trim", {
         allowNull: false,
         // unique: true
     },
+    mainSlug: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+    },
     description: {
         type: DataTypes.TEXT
     },
@@ -31,7 +36,6 @@ const Trim = sequelize.define("trim", {
     },
     price: {
         type: DataTypes.DOUBLE,
-        allowNull: false,
     },
     featuredImage: {
         type: DataTypes.STRING,
@@ -43,10 +47,16 @@ const Trim = sequelize.define("trim", {
     displacement: {
         type: DataTypes.STRING,
     },
+    power: {
+        type: DataTypes.STRING,
+    },
     torque: {
         type: DataTypes.STRING,
     },
     transmission: {
+        type: DataTypes.STRING,
+    },
+    gearBox: {
         type: DataTypes.STRING,
     },
     drive: {
@@ -100,6 +110,9 @@ const Trim = sequelize.define("trim", {
     haveFrontParkAssist: {
         type: DataTypes.BOOLEAN,
     },
+    haveRearParkAssist: {
+        type: DataTypes.BOOLEAN,
+    },
     haveRearParkingCamera: {
         type: DataTypes.BOOLEAN,
     },
@@ -116,6 +129,12 @@ const Trim = sequelize.define("trim", {
         type: DataTypes.BOOLEAN,
     },
     bodyType: {
+        type: DataTypes.STRING,
+    },
+    airbags: {
+        type: DataTypes.STRING,
+    },
+    doors: {
         type: DataTypes.STRING,
     },
     frontBrakes: {
@@ -140,6 +159,9 @@ const Trim = sequelize.define("trim", {
         type: DataTypes.STRING,
     },
     fuelTankSize: {
+        type: DataTypes.STRING,
+    },
+    wheels: {
         type: DataTypes.STRING,
     },
     tyresFront: {
