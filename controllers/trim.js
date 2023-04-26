@@ -1022,6 +1022,46 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
         .json({ trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize) });
 });
 
+module.exports.getCompareTrims = asyncHandler(async (req, res, next) => {
+
+    const { slug } = req.params;
+
+    let mainSlugs = slug.split('-vs-');
+    let where = {
+        mainSlug: mainSlugs
+    };
+
+    let conditions = {
+        raw: true,
+        where
+    };
+
+    let trims = await Trim.findAll(conditions);
+
+    trims = await Promise.all(
+        trims.map(async trim => {
+            trim.brand = await CarBrand.findByPk(trim.brand);
+            trim.model = await Model.findByPk(trim.model, {
+                attributes: ["id", "name"]
+            });
+            trim.images = await TrimImages.findAll({
+                where: {
+                    trimId: trim.id
+                }
+            })
+            trim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: trim.id
+                }
+            })
+            return trim;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ trims });
+});
 
 const fieldValidation = (field, next) => {
     if (!field) {

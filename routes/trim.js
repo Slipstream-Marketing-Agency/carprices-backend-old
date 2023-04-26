@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middlewares/auth");
-const { getTrimsByModel, getTrimsBySlug, getTrimsYearByModel, getTrimsBySlugAndYear, getTrimsByFilter, getTrimsBodyType, getTrimsFuelType, getTrimsByAdvancedSearch, getTrimsBySlugAndYearWithModel } = require("../controllers/trim");
+const { getTrimsByModel, getTrimsBySlug, getTrimsYearByModel, getTrimsBySlugAndYear, getTrimsByFilter, getTrimsBodyType, getTrimsFuelType, getTrimsByAdvancedSearch, getTrimsBySlugAndYearWithModel, getCompareTrims } = require("../controllers/trim");
 
 router.route("/by-model/:model").get(getTrimsByModel);
+router.route("/compare/:slug").get(getCompareTrims);
 router.route("/:trim").get(getTrimsBySlug);
 router.route("/get-years/:modelId").get(getTrimsYearByModel);
 router.route("/filter/list").get(getTrimsByFilter);
