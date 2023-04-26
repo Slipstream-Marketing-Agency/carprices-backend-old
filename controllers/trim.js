@@ -530,6 +530,24 @@ module.exports.getTrimsByModel = asyncHandler(async (req, res, next) => {
         .json({ trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize) });
 });
 
+module.exports.getTrimsByModelMin = asyncHandler(async (req, res, next) => {
+
+    const { model } = req.params;
+    let where = {
+        model
+    };
+    let conditions = {
+        raw: true,
+        where
+    };
+
+    let trims = await Trim.findAll(conditions);
+
+    res
+        .status(200)
+        .json({ trims });
+});
+
 module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
 
     const { trim: slug } = req.params;
