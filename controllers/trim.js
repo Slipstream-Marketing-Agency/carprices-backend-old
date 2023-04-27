@@ -851,6 +851,34 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
         where.isElectric = true
     }
 
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
     where.price = {}
 
     if (query.min) {
@@ -865,6 +893,13 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
             ...where.price,
             [Op.lte]: query.max
         }
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+        
+        where.seatingCapacity = {[Op.or] : seatingCapacity}
     }
 
     let isAll = query.isAll ?? false;
