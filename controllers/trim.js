@@ -1,4 +1,4 @@
-const { where, Op } = require("sequelize");
+const { where, Op, Sequelize } = require("sequelize");
 const asyncHandler = require("../middlewares/asyncHandler");
 const ErrorResponse = require("../util/errorResponse");
 const slugify = require("slugify");
@@ -914,25 +914,89 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
     }
 
     let conditions = {
+        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")) ,"model"]],
         raw: true
     };
     if (!isAll) {
         conditions = {
+            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")) ,"model"]],
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,
-            order: orderBy,
+            // order: orderBy,
             raw: true
         }
     }
 
     let trims = { rows: [], count: 0 };
 
-    trims = await Trim.findAndCountAll(conditions);
+    trims.count = await Trim.count({
+        where,
+        distinct: true,
+        col: 'model'
+    });
+
+    let trimItems = await Trim.findAndCountAll(conditions);
+
+    let modelIds = trimItems.rows.map(trim => trim.model);
+
+    let modelByMainTrim = await Model.findAll({
+        attributes: ["id", "highTrim"],
+        where: {
+            id: modelIds
+        },
+        raw: true
+    })
+
+    modelByMainTrim = await Promise.all(
+        modelByMainTrim.map(async model => {
+            
+            if (model.highTrim) {
+                model.mainTrim = {id: model.highTrim}
+            } else {
+                let highestYear = await Trim.max("year",{
+                    where: {
+                        model: model.id
+                    },
+                })
+                model.mainTrim = await Trim.findOne({
+                    attributes: ["id"],
+                    where: {
+                        model: model.id,
+                        year: highestYear
+                    },
+                    raw: true
+                });
+            }
+
+            return model;
+        })
+    )
+
+    let trimIds = modelByMainTrim.map(model => model.mainTrim.id)
+
+    conditions.where = {
+        id: trimIds
+    }
+    conditions.orderBy = orderBy
+
+    delete conditions.attributes;
+
+    trims.rows = await Trim.findAll(conditions);
 
     trims.rows = await Promise.all(
         trims.rows.map(async trim => {
             trim.brand = await CarBrand.findByPk(trim.brand);
+            trim.minPrice = await Trim.min("price", {
+                where: {
+                    model: trim.model
+                }
+            })
+            trim.maxPrice = await Trim.max("price", {
+                where: {
+                    model: trim.model
+                }
+            })
             trim.model = await Model.findByPk(trim.model, {
                 attributes: ["id", "name"]
             });
@@ -949,6 +1013,28 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
             return trim;
         })
     )
+
+    // trims = await Trim.findAndCountAll(conditions);
+
+    // trims.rows = await Promise.all(
+    //     trims.rows.map(async trim => {
+    //         trim.brand = await CarBrand.findByPk(trim.brand);
+    //         trim.model = await Model.findByPk(trim.model, {
+    //             attributes: ["id", "name"]
+    //         });
+    //         trim.images = await TrimImages.findAll({
+    //             where: {
+    //                 trimId: trim.id
+    //             }
+    //         })
+    //         trim.videos = await TrimVideos.findAll({
+    //             where: {
+    //                 trimId: trim.id
+    //             }
+    //         })
+    //         return trim;
+    //     })
+    // )
 
     res
         .status(200)
@@ -1005,20 +1091,41 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
         }
     }
 
-    if (body.brand) {
+    where.power = {}
+
+    if (body.minPower) {
+        where.power = {
+            ...where.power,
+            [Op.gte]: String(body.minPower) 
+        }
+    }
+
+    if (body.maxPower) {
+        where.power = {
+            ...where.power,
+            [Op.lte]: String(body.maxPower)
+        }
+    }
+
+    if (body.brand && body.brand.length != 0) {
         where.brand = body.brand
     }
 
-    if (body.bodyType) {
+    if (body.bodyType && body.bodyType.length != 0) {
         where.bodyType = body.bodyType
     }
 
-    if (body.fuelType) {
+    if (body.fuelType && body.fuelType.length != 0) {
         where.fuelType = body.fuelType
     }
 
-    if (body.transmission) {
+    if (body.transmission && body.transmission.length != 0) {
         where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
     }
 
     let isAll = query.isAll ?? false;
@@ -1033,26 +1140,92 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     }
 
     let conditions = {
+        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")) ,"model"]],
         raw: true,
-        where
+        where,
+        // group: ['model']
     };
     if (!isAll) {
         conditions = {
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,
-            order: orderBy,
-            raw: true
+            // order: orderBy,
+            raw: true,
+            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")) ,"model"]],
+            // group: ['model']
         }
     }
 
     let trims = { rows: [], count: 0 };
 
-    trims = await Trim.findAndCountAll(conditions);
+    trims.count = await Trim.count({
+        where,
+        distinct: true,
+        col: 'model'
+    });
+
+    let trimItems = await Trim.findAndCountAll(conditions);
+
+    let modelIds = trimItems.rows.map(trim => trim.model);
+
+    let modelByMainTrim = await Model.findAll({
+        attributes: ["id", "highTrim"],
+        where: {
+            id: modelIds
+        },
+        raw: true
+    })
+
+    modelByMainTrim = await Promise.all(
+        modelByMainTrim.map(async model => {
+            
+            if (model.highTrim) {
+                model.mainTrim = {id: model.highTrim}
+            } else {
+                let highestYear = await Trim.max("year",{
+                    where: {
+                        model: model.id
+                    },
+                })
+                model.mainTrim = await Trim.findOne({
+                    attributes: ["id"],
+                    where: {
+                        model: model.id,
+                        year: highestYear
+                    },
+                    raw: true
+                });
+            }
+
+            return model;
+        })
+    )
+
+    let trimIds = modelByMainTrim.map(model => model.mainTrim.id)
+
+    conditions.where = {
+        id: trimIds
+    }
+    conditions.orderBy = orderBy
+
+    delete conditions.attributes;
+
+    trims.rows = await Trim.findAll(conditions);
 
     trims.rows = await Promise.all(
         trims.rows.map(async trim => {
             trim.brand = await CarBrand.findByPk(trim.brand);
+            trim.minPrice = await Trim.min("price", {
+                where: {
+                    model: trim.model
+                }
+            })
+            trim.maxPrice = await Trim.max("price", {
+                where: {
+                    model: trim.model
+                }
+            })
             trim.model = await Model.findByPk(trim.model, {
                 attributes: ["id", "name"]
             });

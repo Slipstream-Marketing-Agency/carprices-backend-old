@@ -1,4 +1,4 @@
-const { where } = require("sequelize");
+const { where, Op } = require("sequelize");
 const asyncHandler = require("../middlewares/asyncHandler");
 const CarBrand = require("../models/CarBrand");
 const ErrorResponse = require("../util/errorResponse");
@@ -23,23 +23,50 @@ const includeOptions = [
 
 module.exports.getCarBrands = asyncHandler(async (req, res, next) => {
 
-  const cacheResults = await redisClient.get("carBrands");
-  if (cacheResults) {
-    isCached = true;
-    results = JSON.parse(cacheResults);
-    return res
-    .status(200)
-    .json(results);
-  } 
+  // const cacheResults = await redisClient.get("carBrands");
+  // if (cacheResults) {
+  //   isCached = true;
+  //   results = JSON.parse(cacheResults);
+  //   return res
+  //   .status(200)
+  //   .json(results);
+  // } 
+
+  const { query } = req;
+
+  let isAll = query.isAll ?? false;
+
+  let pageSize = query.pageSize ?? 10;
+  let currentPage = query.currentPage ?? 1;
+  let orderBy = query.orderBy ? [
+    [query.orderBy, "ASC"]
+  ] : null;
+  let where = {};
+  if (query.search) {
+    where.name = { [Op.iLike]: `%${query.search}%` }
+  }
+
+  let conditions = {
+    raw: true
+  };
+  if (!isAll) {
+    conditions = {
+      where,
+      limit: pageSize,
+      offset: (currentPage - 1) * pageSize,
+      order: orderBy,
+      raw: true
+    }
+  }
 
   let carBrands = { rows: [], count: 0 };
 
-  carBrands = await CarBrand.findAndCountAll();
+  carBrands = await CarBrand.findAndCountAll(conditions);
 
-  await redisClient.set("carBrands", JSON.stringify({ carBrands: carBrands.rows, carBrandsCount: carBrands.count }), {
-    EX: 60 * 60 * 24,
-    NX: true,
-  });
+  // await redisClient.set("carBrands", JSON.stringify({ carBrands: carBrands.rows, carBrandsCount: carBrands.count }), {
+  //   EX: 60 * 60 * 24,
+  //   NX: true,
+  // });
 
   res
     .status(200)

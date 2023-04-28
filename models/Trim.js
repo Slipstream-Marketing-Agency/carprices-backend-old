@@ -48,7 +48,7 @@ const Trim = sequelize.define("trim", {
         type: DataTypes.STRING,
     },
     power: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
     },
     torque: {
         type: DataTypes.STRING,
