@@ -36,9 +36,15 @@ module.exports.createModel = asyncHandler(async (req, res, next) => {
     fieldValidation(year, next);
     fieldValidation(isElectric, next);
 
-    const slug = slugify(name, {
-        lower: true
-    });
+    let slug;
+
+    if (typeof name == 'number') {
+        slug = name
+    }else{
+        slug = slugify(name, {
+            lower: true
+        });
+    }
 
     const model = await Model.create({
         name,

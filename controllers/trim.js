@@ -581,7 +581,7 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
     })
 
     trim.allYearMainTrims = await Trim.findAll({
-        attributes: ["id","name","year", "featuredImage", "slug"],
+        attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
             model: trim.model,
             slug: trim.slug
@@ -710,9 +710,9 @@ module.exports.getTrimsBySlugAndYearWithModel = asyncHandler(async (req, res, ne
             trimId: trim.id
         }
     })
-    
+
     trim.allYearMainTrims = await Trim.findAll({
-        attributes: ["id","name","year", "featuredImage", "slug"],
+        attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
             model: modelData.id,
             slug: trim.slug
@@ -898,8 +898,8 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
     seatingCapacity = [...new Set(seatingCapacity)]
 
     if (seatingCapacity.length !== 0) {
-        
-        where.seatingCapacity = {[Op.or] : seatingCapacity}
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
     }
 
     let isAll = query.isAll ?? false;
@@ -914,12 +914,12 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
     }
 
     let conditions = {
-        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")) ,"model"]],
+        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")), "model"]],
         raw: true
     };
     if (!isAll) {
         conditions = {
-            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")) ,"model"]],
+            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")), "model"]],
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,
@@ -950,11 +950,11 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
 
     modelByMainTrim = await Promise.all(
         modelByMainTrim.map(async model => {
-            
+
             if (model.highTrim) {
-                model.mainTrim = {id: model.highTrim}
+                model.mainTrim = { id: model.highTrim }
             } else {
-                let highestYear = await Trim.max("year",{
+                let highestYear = await Trim.max("year", {
                     where: {
                         model: model.id
                     },
@@ -1096,7 +1096,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     if (body.minPower) {
         where.power = {
             ...where.power,
-            [Op.gte]: String(body.minPower) 
+            [Op.gte]: String(body.minPower)
         }
     }
 
@@ -1140,7 +1140,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     }
 
     let conditions = {
-        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")) ,"model"]],
+        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")), "model"]],
         raw: true,
         where,
         // group: ['model']
@@ -1152,7 +1152,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
             offset: (currentPage - 1) * pageSize,
             // order: orderBy,
             raw: true,
-            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")) ,"model"]],
+            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")), "model"]],
             // group: ['model']
         }
     }
@@ -1179,11 +1179,11 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 
     modelByMainTrim = await Promise.all(
         modelByMainTrim.map(async model => {
-            
+
             if (model.highTrim) {
-                model.mainTrim = {id: model.highTrim}
+                model.mainTrim = { id: model.highTrim }
             } else {
-                let highestYear = await Trim.max("year",{
+                let highestYear = await Trim.max("year", {
                     where: {
                         model: model.id
                     },
@@ -1226,6 +1226,26 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
                     model: trim.model
                 }
             })
+            trim.allTrimsCount = await Trim.count({
+                where: {
+                    model: trim.model,
+                    year: trim.year,
+                    id: {
+                        [Op.ne]: trim.id
+                    }
+                },
+            })
+            trim.allTrims = await Trim.findAll({
+                where: {
+                    model: trim.model,
+                    year: trim.year,
+                    id: {
+                        [Op.ne]: trim.id
+                    }
+                },
+                limit: 5,
+                raw: true
+            })
             trim.model = await Model.findByPk(trim.model, {
                 attributes: ["id", "name"]
             });
@@ -1239,6 +1259,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
                     trimId: trim.id
                 }
             })
+
             return trim;
         })
     )

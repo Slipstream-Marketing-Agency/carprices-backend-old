@@ -12,7 +12,7 @@ const Model = sequelize.define("model", {
     slug: {
         type: DataTypes.STRING(100),
         allowNull: false,
-        unique: true
+        // unique: true
     },
     description: {
         type: DataTypes.TEXT
