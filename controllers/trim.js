@@ -548,6 +548,25 @@ module.exports.getTrimsByModelMin = asyncHandler(async (req, res, next) => {
         .json({ trims });
 });
 
+module.exports.getTrimsByModelMinAndYear = asyncHandler(async (req, res, next) => {
+
+    const { model, year } = req.params;
+    let where = {
+        model,
+        year
+    };
+    let conditions = {
+        raw: true,
+        where
+    };
+
+    let trims = await Trim.findAll(conditions);
+
+    res
+        .status(200)
+        .json({ trims });
+});
+
 module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
 
     const { trim: slug } = req.params;
