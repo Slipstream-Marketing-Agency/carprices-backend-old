@@ -1207,7 +1207,7 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
 
     model.brand = await CarBrand.findByPk(model.brand);
     if (model.highTrim) {
-        model.mainTrim = await Trim.findByPk(model.highTrim);
+        model.mainTrim = await Trim.findByPk(model.highTrim, {raw: true});
         model.mainTrim.images = await TrimImages.findAll({
             where: {
                 trimId: model.mainTrim.id
@@ -1222,7 +1222,8 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
         model.mainTrim = await Trim.findOne({
             where: {
                 model: model.id
-            }
+            },
+            raw: true
         });
         if (model.mainTrim) {
             model.mainTrim.images = await TrimImages.findAll({
