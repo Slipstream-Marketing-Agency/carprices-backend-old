@@ -244,35 +244,36 @@ module.exports.getModels = asyncHandler(async (req, res, next) => {
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
             if (model.highTrim) {
-                model.mainTrim = await Trim.findByPk(model.highTrim);
-                // model.mainTrim.images = await TrimImages.findAll({
-                //     where: {
-                //         trimId: model.mainTrim.id
-                //     }
-                // })
-                // model.mainTrim.videos = await TrimVideos.findAll({
-                //     where: {
-                //         trimId: model.mainTrim.id
-                //     }
-                // })
+                model.mainTrim = await Trim.findByPk(model.highTrim, {raw: true});
+                model.mainTrim.images = await TrimImages.findAll({
+                    where: {
+                        trimId: model.mainTrim.id
+                    }
+                })
+                model.mainTrim.videos = await TrimVideos.findAll({
+                    where: {
+                        trimId: model.mainTrim.id
+                    }
+                })
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
                         model: model.id
-                    }
+                    },
+                    raw: true
                 });
-                // if (model.mainTrim) {
-                //     model.mainTrim.images = await TrimImages.findAll({
-                //         where: {
-                //             trimId: model.mainTrim?.id
-                //         }
-                //     })
-                //     model.mainTrim.videos = await TrimVideos.findAll({
-                //         where: {
-                //             trimId: model.mainTrim?.id
-                //         }
-                //     })
-                // }
+                if (model.mainTrim) {
+                    model.mainTrim.images = await TrimImages.findAll({
+                        where: {
+                            trimId: model.mainTrim?.id
+                        }
+                    })
+                    model.mainTrim.videos = await TrimVideos.findAll({
+                        where: {
+                            trimId: model.mainTrim?.id
+                        }
+                    })
+                }
 
             }
 

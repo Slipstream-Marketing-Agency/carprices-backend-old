@@ -232,6 +232,7 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
                     return tag;
                 })
             )
+            blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
             return blog;
         })
     )
@@ -334,6 +335,7 @@ module.exports.getBlogs = asyncHandler(async (req, res, next) => {
                     return tag;
                 })
             )
+            blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
             return blog;
         })
     )
@@ -479,6 +481,7 @@ module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
                     return tag;
                 })
             )
+            blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
             return blog;
         })
     )
@@ -624,6 +627,7 @@ module.exports.getBlogsByBrand = asyncHandler(async (req, res, next) => {
                     return tag;
                 })
             )
+            blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
             return blog;
         })
     )
@@ -694,7 +698,7 @@ module.exports.getBlogBySlug = asyncHandler(async (req, res, next) => {
             return tag;
         })
     )
-
+    blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
 
     res
         .status(200)

@@ -1229,9 +1229,12 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     conditions.orderBy = orderBy
 
     delete conditions.attributes;
+    delete conditions.offset;
+    delete conditions.limit;
 
     trims.rows = await Trim.findAll(conditions);
 
+    console.log("trims.rows ", trims.rows);
     trims.rows = await Promise.all(
         trims.rows.map(async trim => {
             trim.brand = await CarBrand.findByPk(trim.brand);
