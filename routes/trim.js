@@ -16,7 +16,5 @@ router.route("/filter/advanced").post(getTrimsByAdvancedSearch)
 router.route("/:trim/:year").get(getTrimsBySlugAndYear);
 router.route("/:model/:trim/:year").get(getTrimsBySlugAndYearWithModel);
 
-router.route("/recommended").get(getRecommendedTrims)
-
 
 module.exports = router;

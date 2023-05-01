@@ -48,6 +48,7 @@ module.exports.getCarBrands = asyncHandler(async (req, res, next) => {
   }
 
   let conditions = {
+    order: orderBy,
     raw: true
   };
   if (!isAll) {
@@ -94,7 +95,7 @@ module.exports.mainSearch = asyncHandler(async (req, res, next) => {
   }
 
   let search = await sequelize.query(
-    'SELECT m.name as modelName, b.name as brandName, t.name as trimName, m.id as modelId, b.id as brandId, t.id as trimId, * FROM trims as t, models as m, car_brands as b WHERE t.model = m.id AND m.brand = b.id AND (b.name ILIKE :search_name OR m.name ILIKE :search_name OR t.name ILIKE :search_name OR b.name ILIKE :first_word OR m.name ILIKE :second_word) LIMIT 5',
+    'SELECT m.name as modelName, b.name as brandName, t.name as trimName, m.id as modelId, b.id as brandId, t.id as trimId, m.slug as modelSlug, b.slug as brandSlug, t.slug as trimSlug, * FROM trims as t, models as m, car_brands as b WHERE t.model = m.id AND m.brand = b.id AND (b.name ILIKE :search_name OR m.name ILIKE :search_name OR t.name ILIKE :search_name OR b.name ILIKE :first_word OR m.name ILIKE :second_word) LIMIT 5',
     {
       replacements: { search_name: keyword+'%', first_word, second_word },
       type: QueryTypes.SELECT

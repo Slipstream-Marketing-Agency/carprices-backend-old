@@ -1108,6 +1108,7 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
         [query.orderBy, "ASC"]
     ] : null;
     let where = {
+        id: [268, 228, 126, 244],
         published: true,
         isElectric: true
     };
@@ -1187,6 +1188,80 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
     res
         .status(200)
         .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
+});
+
+module.exports.getSpecificModels = asyncHandler(async (req, res, next) => {
+
+    const {id} = req.body;
+    
+    let where = {
+        id: id,
+        published: true
+    };
+
+    // [268, 228, 126, 244]
+
+    let conditions = {
+        raw: true,
+        where
+    };
+
+    let models = await Model.findAll(conditions);
+
+    models = await Promise.all(
+        models.map(async model => {
+            model.brand = await CarBrand.findByPk(model.brand);
+            model.minPrice = await Trim.min("price",{
+                where: {
+                    model: model.id
+                }
+            });
+        
+            model.maxPrice = await Trim.max("price",{
+                where: {
+                    model: model.id
+                }
+            });
+            if (model.highTrim) {
+                model.mainTrim = await Trim.findByPk(model.highTrim);
+                // model.mainTrim.images = await TrimImages.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+                // model.mainTrim.videos = await TrimVideos.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+            } else {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id
+                    }
+                });
+                // if (model.mainTrim) {
+                //     model.mainTrim.images = await TrimImages.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                //     model.mainTrim.videos = await TrimVideos.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                // }
+
+            }
+
+            return model;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models });
 });
 
 module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
@@ -1295,7 +1370,7 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
     let currentPage = 1;
     let where = {
         published: true,
-        id: [1, 2, 4]
+        id: [1, 2, 4, 6, 7, 8, 10, 12]
     };
 
     let conditions = {
