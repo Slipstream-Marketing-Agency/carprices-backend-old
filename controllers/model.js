@@ -40,7 +40,7 @@ module.exports.createModel = asyncHandler(async (req, res, next) => {
 
     if (typeof name == 'number') {
         slug = name
-    }else{
+    } else {
         slug = slugify(name, {
             lower: true
         });
@@ -244,7 +244,7 @@ module.exports.getModels = asyncHandler(async (req, res, next) => {
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
             if (model.highTrim) {
-                model.mainTrim = await Trim.findByPk(model.highTrim, {raw: true});
+                model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
                 model.mainTrim.images = await TrimImages.findAll({
                     where: {
                         trimId: model.mainTrim.id
@@ -907,13 +907,13 @@ module.exports.getFeaturedModels = asyncHandler(async (req, res, next) => {
     models.rows = await Promise.all(
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            model.minPrice = await Trim.min("price",{
+            model.minPrice = await Trim.min("price", {
                 where: {
                     model: model.id
                 }
             });
-        
-            model.maxPrice = await Trim.max("price",{
+
+            model.maxPrice = await Trim.max("price", {
                 where: {
                     model: model.id
                 }
@@ -1043,13 +1043,13 @@ module.exports.getAdminElectricFeaturedModels = asyncHandler(async (req, res, ne
     models.rows = await Promise.all(
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            model.minPrice = await Trim.min("price",{
+            model.minPrice = await Trim.min("price", {
                 where: {
                     model: model.id
                 }
             });
-        
-            model.maxPrice = await Trim.max("price",{
+
+            model.maxPrice = await Trim.max("price", {
                 where: {
                     model: model.id
                 }
@@ -1137,13 +1137,13 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
     models.rows = await Promise.all(
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            model.minPrice = await Trim.min("price",{
+            model.minPrice = await Trim.min("price", {
                 where: {
                     model: model.id
                 }
             });
-        
-            model.maxPrice = await Trim.max("price",{
+
+            model.maxPrice = await Trim.max("price", {
                 where: {
                     model: model.id
                 }
@@ -1192,8 +1192,8 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
 
 module.exports.getSpecificModels = asyncHandler(async (req, res, next) => {
 
-    const {id} = req.body;
-    
+    const { id } = req.body;
+
     let where = {
         id: id,
         published: true
@@ -1211,13 +1211,13 @@ module.exports.getSpecificModels = asyncHandler(async (req, res, next) => {
     models = await Promise.all(
         models.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            model.minPrice = await Trim.min("price",{
+            model.minPrice = await Trim.min("price", {
                 where: {
                     model: model.id
                 }
             });
-        
-            model.maxPrice = await Trim.max("price",{
+
+            model.maxPrice = await Trim.max("price", {
                 where: {
                     model: model.id
                 }
@@ -1282,7 +1282,7 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
 
     model.brand = await CarBrand.findByPk(model.brand);
     if (model.highTrim) {
-        model.mainTrim = await Trim.findByPk(model.highTrim, {raw: true});
+        model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
         model.mainTrim.images = await TrimImages.findAll({
             where: {
                 trimId: model.mainTrim.id
@@ -1317,22 +1317,82 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
 
     model.trims = await Trim.findAll({
         where: {
-            model: model.id
+            model: model.id,
+            year: model.mainTrim.year
         },
         raw: true
     });
 
-    model.minPrice = await Trim.min("price",{
+    model.minPower = await Trim.min("power", {
         where: {
-            model: model.id
-        }
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
     });
 
-    model.maxPrice = await Trim.max("price",{
+    model.maxPower = await Trim.max("power", {
         where: {
-            model: model.id
-        }
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
     });
+
+    model.minPower = await Trim.min("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.maxPower = await Trim.max("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.minTorque = await Trim.min("torque", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.maxTorque = await Trim.max("torque", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.minfuelConsumption = await Trim.min("fuelConsumption", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.maxfuelConsumption = await Trim.max("fuelConsumption", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.engines = await Trim.findAll({
+        attributes: ['engine'],
+        group: ['engine'],
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    })
+
+    model.engines = model.engines.map(engine => engine.engine);
 
     model.trims = await Promise.all(
         model.trims.map(async trim => {
@@ -1350,8 +1410,10 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
         })
     )
 
+
+
     model.allYearMainTrims = await Trim.findAll({
-        attributes: ["id","name","year", "featuredImage", "slug"],
+        attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
             model: model.id,
             slug: model.mainTrim.slug
@@ -1388,13 +1450,13 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
     models.rows = await Promise.all(
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            model.minPrice = await Trim.min("price",{
+            model.minPrice = await Trim.min("price", {
                 where: {
                     model: model.id
                 }
             });
-        
-            model.maxPrice = await Trim.max("price",{
+
+            model.maxPrice = await Trim.max("price", {
                 where: {
                     model: model.id
                 }
@@ -1457,13 +1519,13 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
             })
             if (v1) {
                 v1.brand = await CarBrand.findByPk(v1.brand);
-                v1.minPrice = await Trim.min("price",{
+                v1.minPrice = await Trim.min("price", {
                     where: {
                         model: v1.id
                     }
                 });
-            
-                v1.maxPrice = await Trim.max("price",{
+
+                v1.maxPrice = await Trim.max("price", {
                     where: {
                         model: v1.id
                     }
@@ -1488,13 +1550,13 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
             })
             if (v2) {
                 v2.brand = await CarBrand.findByPk(v2.brand);
-                v2.minPrice = await Trim.min("price",{
+                v2.minPrice = await Trim.min("price", {
                     where: {
                         model: v2.id
                     }
                 });
-            
-                v2.maxPrice = await Trim.max("price",{
+
+                v2.maxPrice = await Trim.max("price", {
                     where: {
                         model: v2.id
                     }
@@ -1512,7 +1574,7 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
             }
 
 
-            models.push({v1, v2})
+            models.push({ v1, v2 })
         })
     )
 
