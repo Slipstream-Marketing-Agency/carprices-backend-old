@@ -1221,8 +1221,8 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     if (!isAll) {
         conditions = {
             where,
-            limit: pageSize,
-            offset: (currentPage - 1) * pageSize,
+            // limit: pageSize,
+            // offset: (currentPage - 1) * pageSize,
             // order: orderBy,
             raw: true,
             attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")), "model"]],
@@ -1238,9 +1238,9 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
         col: 'model'
     });
 
-    let trimItems = await Trim.findAndCountAll(conditions);
+    let trimItems = await Trim.findAll(conditions);
 
-    let modelIds = trimItems.rows.map(trim => trim.model);
+    let modelIds = trimItems.map(trim => trim.model);
 
     let modelByMainTrim = await Model.findAll({
         attributes: ["id", "highTrim"],
@@ -1286,6 +1286,8 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 
     modelByMainTrim = _.sortBy(modelByMainTrim, trim => trim.lowTrim.price);
 
+    modelByMainTrim = _.slice(modelByMainTrim, (currentPage - 1) * pageSize, (currentPage - 1) * pageSize + pageSize);
+
     let trimIds = modelByMainTrim.map(model => model.mainTrim.id)
 
     conditions.where = {
@@ -1303,7 +1305,6 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 
     //  = await Trim.findAll(conditions);
 
-    console.log("trims.rows ", trims.rows);
     trims.rows = await Promise.all(
         trims.rows.map(async trim => {
             trim.brand = await CarBrand.findByPk(trim.brand);
