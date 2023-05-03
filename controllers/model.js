@@ -672,7 +672,7 @@ module.exports.getModelsByBrandAndYearSlug = asyncHandler(async (req, res, next)
     ] : null;
     let where = {
         brand: brandData.id,
-        year,
+        // year,
         published: true
     };
     if (query.search) {
@@ -733,9 +733,22 @@ module.exports.getModelsByBrandAndYearSlug = asyncHandler(async (req, res, next)
 
             }
 
+            if (model.mainTrim) {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id,
+                        year
+                    }
+                });
+            }
+            
+
             return model;
         })
     )
+
+    models.rows = models.rows.filter(model => model.mainTrim != null);
+    models.count = models.rows.length;
 
     res
         .status(200)

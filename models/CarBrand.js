@@ -15,6 +15,9 @@ const CarBrand = sequelize.define("car_brand", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  description: {
+    type: DataTypes.TEXT,
+  },
 });
 
 module.exports = CarBrand;

@@ -68,8 +68,20 @@ module.exports.getAdminBrands = asyncHandler(async (req, res, next) => {
         .json({ brands: brands.rows, brandsCount: brands.count, totalPage: Math.ceil(brands.count / pageSize) });
 });
 
+module.exports.getCarBrandBySlug = asyncHandler(async (req, res, next) => {
 
+    const { slug } = req.params;
 
+    let brands = await CarBrand.findOne({
+        where: {
+            slug
+        }
+    });
+
+    res
+        .status(200)
+        .json({ brands });
+});
 
 
 const fieldValidation = (field, next) => {
