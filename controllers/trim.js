@@ -1148,37 +1148,55 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 
     let where = {};
 
-    where.price = {}
-
-    if (body.min) {
-        where.price = {
-            ...where.price,
-            [Op.gte]: body.min
-        }
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
     }
 
-    if (body.max) {
-        where.price = {
-            ...where.price,
-            [Op.lte]: body.max
-        }
+    console.log("where ", where);
+
+    // if (body.min) {
+    //     where.price = {
+    //         // ...where.price,
+    //         [Op.gte]: body.min
+    //     }
+    // }
+
+    // if (body.max) {
+    //     where.price = {
+    //         ...where.price,
+    //         [Op.lte]: body.max
+    //     }
+    // }else{
+    //     delete where.price;
+    // }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
     }
 
-    where.power = {}
+    // where.power = {}
 
-    if (body.minPower) {
-        where.power = {
-            ...where.power,
-            [Op.gte]: String(body.minPower)
-        }
-    }
+    // if (body.minPower) {
+    //     where.power = {
+    //         ...where.power,
+    //         [Op.gte]: String(body.minPower)
+    //     }
+    // }
 
-    if (body.maxPower) {
-        where.power = {
-            ...where.power,
-            [Op.lte]: String(body.maxPower)
-        }
-    }
+    // if (body.maxPower) {
+    //     where.power = {
+    //         ...where.power,
+    //         [Op.lte]: String(body.maxPower)
+    //     }
+    // }
 
     if (body.brand && body.brand.length != 0) {
         where.brand = body.brand
@@ -1229,6 +1247,9 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
             // group: ['model']
         }
     }
+
+    console.log("hhaaaa", where);
+    // haaa
 
     let trims = { rows: [], count: 0 };
 
