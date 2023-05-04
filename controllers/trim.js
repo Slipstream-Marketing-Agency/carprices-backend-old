@@ -1286,7 +1286,8 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 
     modelByMainTrim = _.sortBy(modelByMainTrim, trim => trim.lowTrim.price);
 
-    modelByMainTrim = _.slice(modelByMainTrim, (currentPage - 1) * pageSize, (currentPage - 1) * pageSize + pageSize);
+    modelByMainTrim = _.slice(modelByMainTrim, (currentPage - 1) * pageSize, (currentPage - 1) * pageSize + Number(pageSize));
+    // modelByMainTrim = _(modelByMainTrim).drop(skipCount).take(takeCount).value()
 
     let trimIds = modelByMainTrim.map(model => model.mainTrim.id)
 
@@ -1299,8 +1300,14 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     delete conditions.offset;
     delete conditions.limit;
 
+    // trimIds = _.take(trimIds, )
+    // trimIds = _(trimIds).drop(skipCount).take(takeCount).value()
+
     trims.rows = await Promise.all(
-        trimIds.map(async id => await Trim.findByPk(id, {raw: true}))
+        trimIds.map(async id => await Trim.findByPk(id, {
+            // attributes: ["id", "brand", "model", "year", "name", "featuredImage", "slug"],
+            raw: true
+        }))
     )
 
     //  = await Trim.findAll(conditions);
@@ -1322,20 +1329,21 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
                 where: {
                     model: trim.model,
                     year: trim.year,
-                    id: {
-                        [Op.ne]: trim.id
-                    }
+                    // id: {
+                    //     [Op.ne]: trim.id
+                    // }
                 },
             })
             trim.allTrims = await Trim.findAll({
+                attributes: ['id', 'name', 'slug', 'featuredImage'],
                 where: {
                     model: trim.model,
                     year: trim.year,
-                    id: {
-                        [Op.ne]: trim.id
-                    }
+                    // id: {
+                    //     [Op.ne]: trim.id
+                    // }
                 },
-                limit: 5,
+                // limit: 5,
                 raw: true
             })
             trim.model = await Model.findByPk(trim.model, {
