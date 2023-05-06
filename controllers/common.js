@@ -11,6 +11,7 @@ const {
 } = require("../util/helpers");
 const redisClient = require("../util/caching");
 const sequelize = require("../util/database");
+const Model = require("../models/Model");
 
 const includeOptions = [
   // {
@@ -64,6 +65,17 @@ module.exports.getCarBrands = asyncHandler(async (req, res, next) => {
   let carBrands = { rows: [], count: 0 };
 
   carBrands = await CarBrand.findAndCountAll(conditions);
+
+  carBrands.rows = await Promise.all(
+    carBrands.rows.map(async brand => {
+      brand.modelCount = await Model.count({
+        where: {
+          brand: brand.id
+        }
+      })
+      return brand;
+    })
+  )
 
   // await redisClient.set("carBrands", JSON.stringify({ carBrands: carBrands.rows, carBrandsCount: carBrands.count }), {
   //   EX: 60 * 60 * 24,

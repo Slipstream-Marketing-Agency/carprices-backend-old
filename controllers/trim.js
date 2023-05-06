@@ -1182,6 +1182,24 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
         })
     }
 
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min)  }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min)  }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    
+
     // where.power = {}
 
     // if (body.minPower) {
