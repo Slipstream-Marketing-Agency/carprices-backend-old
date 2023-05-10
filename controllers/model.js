@@ -17,23 +17,23 @@ module.exports.createModel = asyncHandler(async (req, res, next) => {
         metaTitle,
         description,
         brand,
-        year,
-        isLuxury,
-        isPremiumLuxury,
-        isSafety,
-        isFuelEfficient,
-        isOffRoad,
-        haveMusic,
-        haveTechnology,
-        havePerformance,
-        isSpacious,
+        // year,
+        // isLuxury,
+        // isPremiumLuxury,
+        // isSafety,
+        // isFuelEfficient,
+        // isOffRoad,
+        // haveMusic,
+        // haveTechnology,
+        // havePerformance,
+        // isSpacious,
         isElectric,
         published
     } = req.body.model;
 
     fieldValidation(name, next);
     fieldValidation(brand, next);
-    fieldValidation(year, next);
+    // fieldValidation(year, next);
     fieldValidation(isElectric, next);
 
     let slug;
@@ -51,16 +51,16 @@ module.exports.createModel = asyncHandler(async (req, res, next) => {
         metaTitle,
         description,
         brand,
-        year,
-        isLuxury,
-        isPremiumLuxury,
-        isSafety,
-        isFuelEfficient,
-        isOffRoad,
-        haveMusic,
-        haveTechnology,
-        havePerformance,
-        isSpacious,
+        year: 2023,
+        // isLuxury,
+        // isPremiumLuxury,
+        // isSafety,
+        // isFuelEfficient,
+        // isOffRoad,
+        // haveMusic,
+        // haveTechnology,
+        // havePerformance,
+        // isSpacious,
         isElectric,
         published,
         slug
@@ -88,6 +88,7 @@ module.exports.getAdminModels = asyncHandler(async (req, res, next) => {
     }
 
     let conditions = {
+        order: orderBy,
         raw: true
     };
     if (!isAll) {
@@ -741,7 +742,7 @@ module.exports.getModelsByBrandAndYearSlug = asyncHandler(async (req, res, next)
                     }
                 });
             }
-            
+
 
             return model;
         })
@@ -1327,6 +1328,357 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
         }
 
     }
+
+    model.trims = await Trim.findAll({
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+        raw: true
+    });
+
+    model.minPower = await Trim.min("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.maxPower = await Trim.max("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.minPower = await Trim.min("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.maxPower = await Trim.max("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.minTorque = await Trim.min("torque", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.maxTorque = await Trim.max("torque", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.minPrice = await Trim.min("price", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.maxPrice = await Trim.max("price", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.minfuelConsumption = await Trim.min("fuelConsumption", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.maxfuelConsumption = await Trim.max("fuelConsumption", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.engines = await Trim.findAll({
+        attributes: ['engine'],
+        group: ['engine'],
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    })
+
+    model.engines = model.engines.map(engine => engine.engine);
+
+    model.trims = await Promise.all(
+        model.trims.map(async trim => {
+            trim.images = await TrimImages.findAll({
+                where: {
+                    trimId: trim?.id
+                }
+            })
+            trim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: trim?.id
+                }
+            })
+            return trim;
+        })
+    )
+
+
+
+    model.allYearMainTrims = await Trim.findAll({
+        attributes: ["id", "name", "year", "featuredImage", "slug"],
+        where: {
+            model: model.id,
+            slug: model.mainTrim.slug
+        }
+    });
+
+
+    res
+        .status(200)
+        .json({ model });
+});
+
+module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
+
+    const { model: slug, brand: brandSlug } = req.params;
+
+    const brand = await CarBrand.findOne({ where: { slug: brandSlug }, raw: true });
+
+    let where = {
+        slug,
+        brand: brand.id
+    };
+
+    const model = await Model.findOne({ where, raw: true });
+
+    if (!model) {
+        return res.status(404).json({
+            message: "Model not found"
+        })
+    }
+
+    model.brand = await CarBrand.findByPk(model.brand);
+    if (model.highTrim) {
+        model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
+        model.mainTrim.images = await TrimImages.findAll({
+            where: {
+                trimId: model.mainTrim.id
+            }
+        })
+        model.mainTrim.videos = await TrimVideos.findAll({
+            where: {
+                trimId: model.mainTrim.id
+            }
+        })
+    } else {
+        model.mainTrim = await Trim.findOne({
+            where: {
+                model: model.id
+            },
+            raw: true
+        });
+        if (model.mainTrim) {
+            model.mainTrim.images = await TrimImages.findAll({
+                where: {
+                    trimId: model.mainTrim?.id
+                }
+            })
+            model.mainTrim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: model.mainTrim?.id
+                }
+            })
+        }
+
+    }
+
+    model.trims = await Trim.findAll({
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+        raw: true
+    });
+
+    model.minPower = await Trim.min("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.maxPower = await Trim.max("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.minPower = await Trim.min("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.maxPower = await Trim.max("power", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+
+    });
+
+    model.minTorque = await Trim.min("torque", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.maxTorque = await Trim.max("torque", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.minPrice = await Trim.min("price", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.maxPrice = await Trim.max("price", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.minfuelConsumption = await Trim.min("fuelConsumption", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.maxfuelConsumption = await Trim.max("fuelConsumption", {
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    });
+
+    model.engines = await Trim.findAll({
+        attributes: ['engine'],
+        group: ['engine'],
+        where: {
+            model: model.id,
+            year: model.mainTrim.year
+        },
+    })
+
+    model.engines = model.engines.map(engine => engine.engine);
+
+    model.trims = await Promise.all(
+        model.trims.map(async trim => {
+            trim.images = await TrimImages.findAll({
+                where: {
+                    trimId: trim?.id
+                }
+            })
+            trim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: trim?.id
+                }
+            })
+            return trim;
+        })
+    )
+
+
+
+    model.allYearMainTrims = await Trim.findAll({
+        attributes: ["id", "name", "year", "featuredImage", "slug"],
+        where: {
+            model: model.id,
+            slug: model.mainTrim.slug
+        }
+    });
+
+
+    res
+        .status(200)
+        .json({ model });
+});
+
+module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next) => {
+
+    const { model: slug, brand: brandSlug, year } = req.params;
+
+    const brand = await CarBrand.findOne({ where: { slug: brandSlug }, raw: true });
+
+    let where = {
+        slug,
+        brand: brand.id
+    };
+
+    const model = await Model.findOne({ where, raw: true });
+
+    if (!model) {
+        return res.status(404).json({
+            message: "Model not found"
+        })
+    }
+
+    model.brand = await CarBrand.findByPk(model.brand);
+
+    model.mainTrim = await Trim.findOne({
+        where: {
+            model: model.id,
+            year
+        },
+        raw: true
+    });
+    if (model.mainTrim) {
+        model.mainTrim.images = await TrimImages.findAll({
+            where: {
+                trimId: model.mainTrim?.id
+            }
+        })
+        model.mainTrim.videos = await TrimVideos.findAll({
+            where: {
+                trimId: model.mainTrim?.id
+            }
+        })
+    }else{
+            return res.status(404).json({
+                message: "Trim not found"
+            })
+    }
+
+
 
     model.trims = await Trim.findAll({
         where: {

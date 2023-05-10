@@ -49,7 +49,9 @@ module.exports.getAdminBrands = asyncHandler(async (req, res, next) => {
         where.name = { [Op.iLike]: `%${query.search}%` }
     }
 
-    let conditions = {};
+    let conditions = {
+        order: orderBy
+    };
     if (!isAll) {
         conditions = {
             where,
