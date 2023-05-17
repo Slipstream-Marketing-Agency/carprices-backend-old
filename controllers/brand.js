@@ -70,6 +70,21 @@ module.exports.getAdminBrands = asyncHandler(async (req, res, next) => {
         .json({ brands: brands.rows, brandsCount: brands.count, totalPage: Math.ceil(brands.count / pageSize) });
 });
 
+module.exports.getAdminBrandById = asyncHandler(async (req, res, next) => {
+
+    const { id } = req.params;
+
+    let brand = await CarBrand.findOne({
+        where: {
+            id
+        }
+    });
+
+    res
+        .status(200)
+        .json({ brand });
+});
+
 module.exports.getCarBrandBySlug = asyncHandler(async (req, res, next) => {
 
     const { slug } = req.params;
@@ -85,6 +100,39 @@ module.exports.getCarBrandBySlug = asyncHandler(async (req, res, next) => {
         .json({ brands });
 });
 
+module.exports.updateBrand = asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+
+    const {
+        name,
+        image,
+        slug
+    } = req.body.brand;
+
+    fieldValidation(name, next);
+    fieldValidation(image, next);
+    fieldValidation(slug, next);
+
+    // const slug = slugify(name, {
+    //     lower: true
+    // });
+
+    const brand = await CarBrand.update({
+        name,
+        image,
+        slug
+    }, {
+        where: {
+            id
+        }
+    }).catch( err => {
+        console.log("error ", err);
+    });
+
+    await redisClient.del("brands");
+
+    res.status(201).json({ brand });
+});
 
 const fieldValidation = (field, next) => {
     if (!field) {
