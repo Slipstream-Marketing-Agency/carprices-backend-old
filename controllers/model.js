@@ -117,6 +117,71 @@ module.exports.getAdminModels = asyncHandler(async (req, res, next) => {
         .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
 });
 
+module.exports.getAdminModelByBrand = asyncHandler(async (req, res, next) => {
+
+    const { brand } = req.params;
+
+    let models = await Model.findAll({where: {
+        brand
+    }});
+
+    res
+        .status(200)
+        .json({ models });
+});
+
+module.exports.getAdminModelById = asyncHandler(async (req, res, next) => {
+
+    const { model: id } = req.params;
+
+    let model = await Model.findByPk(id, {raw: true});
+
+    model.brand = await CarBrand.findByPk(model.brand);
+
+    model.trims = await Trim.findAll({
+        where: {
+            model: model.id
+        },
+        raw: true
+    });
+
+    model.trims = await Promise.all(
+        model.trims.map(async trim => {
+            trim.images = await TrimImages.findAll({
+                where: {
+                    trimId: trim?.id
+                }
+            })
+            trim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: trim?.id
+                }
+            })
+            return trim;
+        })
+    )
+
+    console.log("model.highTrim ", model.highTrim);
+
+    if (model.highTrim) {
+        model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
+        model.mainTrim.images = await TrimImages.findAll({
+            where: {
+                trimId: model.mainTrim.id
+            }
+        })
+        model.mainTrim.videos = await TrimVideos.findAll({
+            where: {
+                trimId: model.mainTrim.id
+            }
+        })
+    }
+
+    res
+        .status(200)
+        .json({ model });
+});
+
 module.exports.updateModel = asyncHandler(async (req, res, next) => {
 
     const { model } = req.params;
@@ -1672,10 +1737,10 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
                 trimId: model.mainTrim?.id
             }
         })
-    }else{
-            return res.status(404).json({
-                message: "Trim not found"
-            })
+    } else {
+        return res.status(404).json({
+            message: "Trim not found"
+        })
     }
 
 

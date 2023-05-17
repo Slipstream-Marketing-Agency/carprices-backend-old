@@ -269,6 +269,33 @@ module.exports.getAdminTrims = asyncHandler(async (req, res, next) => {
         .json({ trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize) });
 });
 
+module.exports.getAdminTrimById = asyncHandler(async (req, res, next) => {
+
+    const { trim: id } = req.params;
+
+    let trim = await Trim.findByPk(id, { raw: true });
+
+    trim.brand = await CarBrand.findByPk(trim.brand);
+    trim.model = await Model.findByPk(trim.model, {
+        // attributes: ["id", "name"]
+    });
+
+    trim.images = await TrimImages.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+    trim.videos = await TrimVideos.findAll({
+        where: {
+            trimId: trim.id
+        }
+    })
+
+    res
+        .status(200)
+        .json({ trim });
+});
+
 module.exports.updateTrim = asyncHandler(async (req, res, next) => {
 
     const { trim } = req.params;
@@ -1185,7 +1212,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     if (body.displacement && body.displacement.length != 0) {
         where.displacement = {}
         body.displacement.map(displacement => {
-            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min)  }
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
             where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
         })
     }
@@ -1193,12 +1220,12 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     if (body.fuelConsumption && body.fuelConsumption.length != 0) {
         where.fuelConsumption = {}
         body.fuelConsumption.map(fuelConsumption => {
-            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min)  }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
             where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
         })
     }
 
-    
+
 
     // where.power = {}
 
