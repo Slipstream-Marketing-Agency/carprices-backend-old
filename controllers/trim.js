@@ -1350,7 +1350,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
         })
     )
 
-    modelByMainTrim = _.sortBy(modelByMainTrim, trim => trim.lowTrim.price);
+    modelByMainTrim = _.sortBy(modelByMainTrim, trim => trim.lowTrim?.price);
 
     modelByMainTrim = _.slice(modelByMainTrim, (currentPage - 1) * pageSize, (currentPage - 1) * pageSize + Number(pageSize));
     // modelByMainTrim = _(modelByMainTrim).drop(skipCount).take(takeCount).value()
