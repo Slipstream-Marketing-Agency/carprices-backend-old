@@ -11,6 +11,7 @@ module.exports.createBrand = asyncHandler(async (req, res, next) => {
     const {
         name,
         image,
+        coverImage
     } = req.body.brand;
 
     fieldValidation(name, next);
@@ -23,7 +24,8 @@ module.exports.createBrand = asyncHandler(async (req, res, next) => {
     const brand = await CarBrand.create({
         name,
         image,
-        slug
+        slug,
+        coverImage
     }).catch( err => {
         console.log("error ", err);
     });
@@ -106,7 +108,8 @@ module.exports.updateBrand = asyncHandler(async (req, res, next) => {
     const {
         name,
         image,
-        slug
+        slug,
+        coverImage
     } = req.body.brand;
 
     fieldValidation(name, next);
@@ -120,7 +123,8 @@ module.exports.updateBrand = asyncHandler(async (req, res, next) => {
     const brand = await CarBrand.update({
         name,
         image,
-        slug
+        slug,
+        coverImage
     }, {
         where: {
             id
