@@ -96,7 +96,7 @@ module.exports.mainSearch = asyncHandler(async (req, res, next) => {
 
   let first_word = ''
   let second_word = ''
-  let words = keyword.split("+")
+  let words = keyword.split(" ")
   console.log('www ', words);
   if (words.length == 2) {
     first_word = words[0]+'%'

@@ -1122,6 +1122,27 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
                     model: trim.model
                 }
             })
+            trim.allTrimsCount = await Trim.count({
+                where: {
+                    model: trim.model,
+                    year: trim.year,
+                    // id: {
+                    //     [Op.ne]: trim.id
+                    // }
+                },
+            })
+            trim.allTrims = await Trim.findAll({
+                attributes: ['id', 'name', 'slug', 'featuredImage'],
+                where: {
+                    model: trim.model,
+                    year: trim.year,
+                    // id: {
+                    //     [Op.ne]: trim.id
+                    // }
+                },
+                // limit: 5,
+                raw: true
+            })
             trim.model = await Model.findByPk(trim.model, {
                 attributes: ["id", "name"]
             });
