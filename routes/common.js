@@ -3,13 +3,14 @@ const router = express.Router();
 const {
   getCarBrands, mainSearch,
 } = require("../controllers/common");
-const { getTrimMinMaxFilterPrice, getTrimMinMaxFilterPower, getTrimMinMaxFilterTorque } = require("../controllers/trim");
+const { getTrimMinMaxFilterPrice, getTrimMinMaxFilterPower, getTrimMinMaxFilterTorque, getTrimMinMaxFilterPriceDynamic, getTrimMinMaxFilterPowerDynamic, getTrimMinMaxFilterTorqueDynamic, getTrimMinMaxFilterDisplacementDynamic, getTrimMinMaxFilterDisplacement, getCarBrandsDynamic } = require("../controllers/trim");
 const { protect } = require("../middlewares/auth");
 
-router.route("/brands").get(getCarBrands);
-router.route("/filter/get-min-max").get(getTrimMinMaxFilterPrice);
-router.route("/filter/power/get-min-max").get(getTrimMinMaxFilterPower);
-router.route("/filter/torque/get-min-max").get(getTrimMinMaxFilterTorque);
+router.route("/brands").get(getCarBrands).post(getCarBrandsDynamic);
+router.route("/filter/get-min-max").get(getTrimMinMaxFilterPrice).post(getTrimMinMaxFilterPriceDynamic);
+router.route("/filter/power/get-min-max").get(getTrimMinMaxFilterPower).post(getTrimMinMaxFilterPowerDynamic);
+router.route("/filter/torque/get-min-max").get(getTrimMinMaxFilterTorque).post(getTrimMinMaxFilterTorqueDynamic);
+router.route("/filter/displacement/get-min-max").get(getTrimMinMaxFilterDisplacement).post(getTrimMinMaxFilterDisplacementDynamic);
 router.route("/search/:keyword").get(mainSearch);
 
 module.exports = router;

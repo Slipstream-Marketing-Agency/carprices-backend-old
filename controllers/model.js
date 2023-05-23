@@ -1187,7 +1187,7 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
         [query.orderBy, "ASC"]
     ] : null;
     let where = {
-        id: [111, 166, 231, 251],
+        id: [79, 333, 209, 210, 246, 376],
         published: true,
         isElectric: true
     };

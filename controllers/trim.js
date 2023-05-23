@@ -861,11 +861,201 @@ module.exports.getTrimMinMaxFilterPrice = asyncHandler(async (req, res, next) =>
         .json({ min, max });
 });
 
+module.exports.getTrimMinMaxFilterPriceDynamic = asyncHandler(async (req, res, next) => {
+
+    const { query, body } = req;
+
+    let where = {};
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    const min = await Trim.min("price", {
+        where
+
+    });
+
+    const max = await Trim.max("price", {
+        where
+
+    });
+
+
+    res
+        .status(200)
+        .json({ min, max });
+});
+
 module.exports.getTrimMinMaxFilterPower = asyncHandler(async (req, res, next) => {
 
     const { query } = req;
 
     let where = {};
+
+    const min = await Trim.min("power", {
+        where
+
+    });
+
+    const max = await Trim.max("power", {
+        where
+
+    });
+
+
+    res
+        .status(200)
+        .json({ min, max });
+});
+
+module.exports.getTrimMinMaxFilterPowerDynamic = asyncHandler(async (req, res, next) => {
+
+    const { body } = req;
+
+    let where = {};
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
 
     const min = await Trim.min("power", {
         where
@@ -895,6 +1085,178 @@ module.exports.getTrimMinMaxFilterTorque = asyncHandler(async (req, res, next) =
     });
 
     const max = await Trim.max("torque", {
+        where
+
+    });
+
+
+    res
+        .status(200)
+        .json({ min, max });
+});
+
+module.exports.getTrimMinMaxFilterTorqueDynamic = asyncHandler(async (req, res, next) => {
+
+    const { body } = req;
+
+    let where = {};
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    const min = await Trim.min("torque", {
+        where
+
+    });
+
+    const max = await Trim.max("torque", {
+        where
+
+    });
+
+
+    res
+        .status(200)
+        .json({ min, max });
+});
+
+module.exports.getTrimMinMaxFilterDisplacement = asyncHandler(async (req, res, next) => {
+
+    const { query } = req;
+
+    let where = {};
+
+    const min = await Trim.min("displacement", {
+        where
+
+    });
+
+    const max = await Trim.max("displacement", {
+        where
+
+    });
+
+
+    res
+        .status(200)
+        .json({ min, max });
+});
+
+module.exports.getTrimMinMaxFilterDisplacementDynamic = asyncHandler(async (req, res, next) => {
+
+    const { body } = req;
+
+    let where = {};
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    const min = await Trim.min("displacement", {
+        where
+
+    });
+
+    const max = await Trim.max("displacement", {
         where
 
     });
@@ -1054,7 +1416,7 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
 
             if (model.highTrim) {
                 // model.mainTrim = { id: model.highTrim }
-                
+
                 model.mainTrim = await Trim.findOne({
                     attributes: ["id", "price"],
                     where: {
@@ -1087,7 +1449,7 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
     modelByMainTrim = _.orderBy(modelByMainTrim, model => model.mainTrim?.price, sortType.toLowerCase());
 
     trims.count = modelByMainTrim.length;
-    
+
     modelByMainTrim = _.slice(modelByMainTrim, (currentPage - 1) * pageSize, (currentPage - 1) * pageSize + Number(pageSize));
 
     let trimIds = modelByMainTrim.map(model => model.mainTrim.id)
@@ -1201,6 +1563,78 @@ module.exports.getTrimsBodyType = asyncHandler(async (req, res, next) => {
         .json({ bodyType });
 });
 
+module.exports.getTrimsBodyTypeDynamic = asyncHandler(async (req, res, next) => {
+
+    const { body } = req;
+
+    let where = {};
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    let bodyType = await Trim.findAll({
+        attributes: ['bodyType'],
+        group: ['bodyType'],
+        where
+    });
+
+    bodyType = bodyType.map(item => item.bodyType)
+
+    res
+        .status(200)
+        .json({ bodyType });
+});
+
 module.exports.getTrimsFuelType = asyncHandler(async (req, res, next) => {
 
     let fuelType = await Trim.findAll({
@@ -1213,6 +1647,250 @@ module.exports.getTrimsFuelType = asyncHandler(async (req, res, next) => {
     res
         .status(200)
         .json({ fuelType });
+});
+
+module.exports.getTrimsFuelTypeDynamic = asyncHandler(async (req, res, next) => {
+
+    const { body } = req;
+
+    let where = {};
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    let fuelType = await Trim.findAll({
+        attributes: ['fuelType'],
+        group: ['fuelType'],
+        where
+    });
+
+    fuelType = fuelType.map(item => item.fuelType)
+
+    res
+        .status(200)
+        .json({ fuelType });
+});
+
+module.exports.getTrimsTransmissions = asyncHandler(async (req, res, next) => {
+
+    let transmission = await Trim.findAll({
+        attributes: ['transmission'],
+        group: ['transmission']
+    });
+
+    transmission = transmission.map(item => item.transmission)
+
+    res
+        .status(200)
+        .json({ transmission });
+});
+
+module.exports.getTrimsTransmissionsDynamic = asyncHandler(async (req, res, next) => {
+
+    const { body } = req;
+
+    let where = {};
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    let transmission = await Trim.findAll({
+        attributes: ['transmission'],
+        group: ['transmission'],
+        where
+    });
+
+    transmission = transmission.map(item => item.transmission)
+
+    res
+        .status(200)
+        .json({ transmission });
+});
+
+module.exports.getTrimsCylinderNo = asyncHandler(async (req, res, next) => {
+
+    let cylinders = await Trim.findAll({
+        attributes: ['cylinders'],
+        group: ['cylinders']
+    });
+
+    cylinders = cylinders.map(item => item.cylinders)
+
+    res
+        .status(200)
+        .json({ cylinders });
+});
+
+module.exports.getTrimsCylinderNoDynamic = asyncHandler(async (req, res, next) => {
+
+    const { body } = req;
+
+    let where = {};
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    let cylinders = await Trim.findAll({
+        attributes: ['cylinders'],
+        group: ['cylinders'],
+        where
+    });
+
+    cylinders = cylinders.map(item => item.cylinders)
+
+    res
+        .status(200)
+        .json({ cylinders });
 });
 
 module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) => {
@@ -1422,8 +2100,8 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
             return model;
         })
     )
-    
-    modelByMainTrim = modelByMainTrim.filter(trim => trim.lowPrice != null) 
+
+    modelByMainTrim = modelByMainTrim.filter(trim => trim.lowPrice != null)
 
     modelByMainTrim = _.sortBy(modelByMainTrim, trim => trim.lowPrice);
 
@@ -1512,6 +2190,100 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     res
         .status(200)
         .json({ trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize) });
+});
+
+module.exports.getCarBrandsDynamic = asyncHandler(async (req, res, next) => {
+
+    const { body } = req;
+
+    let where = {};
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    let brand = await Trim.findAll({
+        attributes: ['brand'],
+        group: ['brand'],
+        where
+    });
+
+    brand = brand.map(item => item.brand)
+
+    let carBrands = { rows: [], count: 0 };
+
+    carBrands = await CarBrand.findAndCountAll({
+        where: {
+            id: brand
+        },
+        order: [
+            ["name", "ASC"]
+        ]
+    });
+
+    carBrands.rows = await Promise.all(
+        carBrands.rows.map(async brand => {
+            brand.modelCount = await Model.count({
+                where: {
+                    brand: brand.id
+                }
+            })
+            return brand;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ carBrands: carBrands.rows, carBrandsCount: carBrands.count });
 });
 
 module.exports.getCompareTrims = asyncHandler(async (req, res, next) => {
