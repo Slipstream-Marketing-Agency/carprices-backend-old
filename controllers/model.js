@@ -121,9 +121,11 @@ module.exports.getAdminModelByBrand = asyncHandler(async (req, res, next) => {
 
     const { brand } = req.params;
 
-    let models = await Model.findAll({where: {
-        brand
-    }});
+    let models = await Model.findAll({
+        where: {
+            brand
+        }
+    });
 
     res
         .status(200)
@@ -134,7 +136,7 @@ module.exports.getAdminModelById = asyncHandler(async (req, res, next) => {
 
     const { model: id } = req.params;
 
-    let model = await Model.findByPk(id, {raw: true});
+    let model = await Model.findByPk(id, { raw: true });
 
     model.brand = await CarBrand.findByPk(model.brand);
 
@@ -986,17 +988,7 @@ module.exports.getFeaturedModels = asyncHandler(async (req, res, next) => {
     models.rows = await Promise.all(
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            model.minPrice = await Trim.min("price", {
-                where: {
-                    model: model.id
-                }
-            });
 
-            model.maxPrice = await Trim.max("price", {
-                where: {
-                    model: model.id
-                }
-            });
             if (model.highTrim) {
                 model.mainTrim = await Trim.findByPk(model.highTrim);
                 // model.mainTrim.images = await TrimImages.findAll({
@@ -1029,6 +1021,19 @@ module.exports.getFeaturedModels = asyncHandler(async (req, res, next) => {
                 // }
 
             }
+            model.minPrice = await Trim.min("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year
+                }
+            });
+
+            model.maxPrice = await Trim.max("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year
+                }
+            });
 
             return model;
         })
@@ -1216,17 +1221,6 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
     models.rows = await Promise.all(
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            model.minPrice = await Trim.min("price", {
-                where: {
-                    model: model.id
-                }
-            });
-
-            model.maxPrice = await Trim.max("price", {
-                where: {
-                    model: model.id
-                }
-            });
             if (model.highTrim) {
                 model.mainTrim = await Trim.findByPk(model.highTrim);
                 // model.mainTrim.images = await TrimImages.findAll({
@@ -1259,6 +1253,19 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
                 // }
 
             }
+            model.minPrice = await Trim.min("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year
+                }
+            });
+
+            model.maxPrice = await Trim.max("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year
+                }
+            });
 
             return model;
         })
@@ -1290,17 +1297,6 @@ module.exports.getSpecificModels = asyncHandler(async (req, res, next) => {
     models = await Promise.all(
         models.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            model.minPrice = await Trim.min("price", {
-                where: {
-                    model: model.id
-                }
-            });
-
-            model.maxPrice = await Trim.max("price", {
-                where: {
-                    model: model.id
-                }
-            });
             if (model.highTrim) {
                 model.mainTrim = await Trim.findByPk(model.highTrim);
                 // model.mainTrim.images = await TrimImages.findAll({
@@ -1333,6 +1329,19 @@ module.exports.getSpecificModels = asyncHandler(async (req, res, next) => {
                 // }
 
             }
+            model.minPrice = await Trim.min("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year
+                }
+            });
+
+            model.maxPrice = await Trim.max("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year
+                }
+            });
 
             return model;
         })
@@ -1880,17 +1889,6 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
     models.rows = await Promise.all(
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            model.minPrice = await Trim.min("price", {
-                where: {
-                    model: model.id
-                }
-            });
-
-            model.maxPrice = await Trim.max("price", {
-                where: {
-                    model: model.id
-                }
-            });
             if (model.highTrim) {
                 model.mainTrim = await Trim.findByPk(model.highTrim);
                 // model.mainTrim.images = await TrimImages.findAll({
@@ -1923,6 +1921,19 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
                 // }
 
             }
+            model.minPrice = await Trim.min("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year
+                }
+            });
+
+            model.maxPrice = await Trim.max("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year
+                }
+            });
 
             return model;
         })
@@ -1949,17 +1960,6 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
             })
             if (v1) {
                 v1.brand = await CarBrand.findByPk(v1.brand);
-                v1.minPrice = await Trim.min("price", {
-                    where: {
-                        model: v1.id
-                    }
-                });
-
-                v1.maxPrice = await Trim.max("price", {
-                    where: {
-                        model: v1.id
-                    }
-                });
                 if (v1.highTrim) {
                     v1.mainTrim = await Trim.findByPk(v1.highTrim);
                 } else {
@@ -1970,6 +1970,19 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
                     });
 
                 }
+                v1.minPrice = await Trim.min("price", {
+                    where: {
+                        model: v1.id,
+                        year: v1.mainTrim.year
+                    }
+                });
+
+                v1.maxPrice = await Trim.max("price", {
+                    where: {
+                        model: v1.id,
+                        year: v1.mainTrim.year
+                    }
+                });
             }
 
             let v2 = await Model.findOne({
@@ -1980,17 +1993,6 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
             })
             if (v2) {
                 v2.brand = await CarBrand.findByPk(v2.brand);
-                v2.minPrice = await Trim.min("price", {
-                    where: {
-                        model: v2.id
-                    }
-                });
-
-                v2.maxPrice = await Trim.max("price", {
-                    where: {
-                        model: v2.id
-                    }
-                });
                 if (v2.highTrim) {
                     v2.mainTrim = await Trim.findByPk(v2.highTrim);
                 } else {
@@ -2001,6 +2003,19 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
                     });
 
                 }
+                v2.minPrice = await Trim.min("price", {
+                    where: {
+                        model: v2.id,
+                        year: v2.mainTrim.year
+                    }
+                });
+
+                v2.maxPrice = await Trim.max("price", {
+                    where: {
+                        model: v2.id,
+                        year: v2.mainTrim.year
+                    }
+                });
             }
 
 
