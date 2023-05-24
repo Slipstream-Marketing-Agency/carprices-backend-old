@@ -8,5 +8,4 @@ router.route("/:slug").get(getBlogBySlug)
 router.route("/by-model/:model").get(getBlogsByModel)
 router.route("/by-brand/:brand").get(getBlogsByBrand);
 
-
 module.exports = router;

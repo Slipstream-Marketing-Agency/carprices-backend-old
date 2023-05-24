@@ -803,7 +803,9 @@ module.exports.getTrimMinMaxFilterPrice = asyncHandler(async (req, res, next) =>
 
     const { query } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (query.isLuxury) {
         where.isLuxury = true
@@ -865,7 +867,9 @@ module.exports.getTrimMinMaxFilterPriceDynamic = asyncHandler(async (req, res, n
 
     const { query, body } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -980,7 +984,9 @@ module.exports.getTrimMinMaxFilterPower = asyncHandler(async (req, res, next) =>
 
     const { query } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     const min = await Trim.min("power", {
         where
@@ -1002,7 +1008,9 @@ module.exports.getTrimMinMaxFilterPowerDynamic = asyncHandler(async (req, res, n
 
     const { body } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -1077,7 +1085,9 @@ module.exports.getTrimMinMaxFilterTorque = asyncHandler(async (req, res, next) =
 
     const { query } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     const min = await Trim.min("torque", {
         where
@@ -1099,7 +1109,9 @@ module.exports.getTrimMinMaxFilterTorqueDynamic = asyncHandler(async (req, res, 
 
     const { body } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -1174,7 +1186,9 @@ module.exports.getTrimMinMaxFilterDisplacement = asyncHandler(async (req, res, n
 
     const { query } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     const min = await Trim.min("displacement", {
         where
@@ -1196,7 +1210,9 @@ module.exports.getTrimMinMaxFilterDisplacementDynamic = asyncHandler(async (req,
 
     const { body } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -1375,9 +1391,13 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
     if (query.search) {
         where.name = { [Op.iLike]: `%${query.search}%` }
     }
+    where.year = { [Op.gte]: new Date().getFullYear() }
 
     let conditions = {
         attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")), "model"]],
+        where: {
+            year: { [Op.gte]: new Date().getFullYear() }
+        },
         raw: true
     };
     if (!isAll) {
@@ -1553,7 +1573,10 @@ module.exports.getTrimsBodyType = asyncHandler(async (req, res, next) => {
 
     let bodyType = await Trim.findAll({
         attributes: ['bodyType'],
-        group: ['bodyType']
+        group: ['bodyType'],
+        where: {
+            year: { [Op.gte]: new Date().getFullYear() }
+        }
     });
 
     bodyType = bodyType.map(item => item.bodyType)
@@ -1567,7 +1590,9 @@ module.exports.getTrimsBodyTypeDynamic = asyncHandler(async (req, res, next) => 
 
     const { body } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -1639,7 +1664,10 @@ module.exports.getTrimsFuelType = asyncHandler(async (req, res, next) => {
 
     let fuelType = await Trim.findAll({
         attributes: ['fuelType'],
-        group: ['fuelType']
+        group: ['fuelType'],
+        where: {
+            year: { [Op.gte]: new Date().getFullYear() }
+        }
     });
 
     fuelType = fuelType.map(item => item.fuelType)
@@ -1653,7 +1681,9 @@ module.exports.getTrimsFuelTypeDynamic = asyncHandler(async (req, res, next) => 
 
     const { body } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -1725,7 +1755,10 @@ module.exports.getTrimsTransmissions = asyncHandler(async (req, res, next) => {
 
     let transmission = await Trim.findAll({
         attributes: ['transmission'],
-        group: ['transmission']
+        group: ['transmission'],
+        where: {
+            year: { [Op.gte]: new Date().getFullYear() }
+        }
     });
 
     transmission = transmission.map(item => item.transmission)
@@ -1739,7 +1772,9 @@ module.exports.getTrimsTransmissionsDynamic = asyncHandler(async (req, res, next
 
     const { body } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -1811,7 +1846,10 @@ module.exports.getTrimsCylinderNo = asyncHandler(async (req, res, next) => {
 
     let cylinders = await Trim.findAll({
         attributes: ['cylinders'],
-        group: ['cylinders']
+        group: ['cylinders'],
+        where: {
+            year: { [Op.gte]: new Date().getFullYear() }
+        }
     });
 
     cylinders = cylinders.map(item => item.cylinders)
@@ -1825,7 +1863,9 @@ module.exports.getTrimsCylinderNoDynamic = asyncHandler(async (req, res, next) =
 
     const { body } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -1897,7 +1937,9 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 
     const { body, query } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -2196,7 +2238,9 @@ module.exports.getCarBrandsDynamic = asyncHandler(async (req, res, next) => {
 
     const { body } = req;
 
-    let where = {};
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
 
     if (body.price && body.price.length != 0) {
         where.price = {}
