@@ -1949,8 +1949,6 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
         })
     }
 
-    console.log("where ", where);
-
     // if (body.min) {
     //     where.price = {
     //         // ...where.price,
@@ -2059,9 +2057,6 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
         }
     }
 
-    console.log("hhaaaa", where);
-    // haaa
-
     let trims = { rows: [], count: 0 };
 
     trims.count = await Trim.count({
@@ -2097,7 +2092,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
                 model.lowPrice = await Trim.min("price", {
                     where: {
                         model: model.id,
-                        // year: model.mainTrim.year
+                        year: model.mainTrim.year
                     }
                 })
                 model.lowTrim = await Trim.findOne({
@@ -2125,7 +2120,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
                 model.lowPrice = await Trim.min("price", {
                     where: {
                         model: model.id,
-                        // year: highestYear
+                        year: highestYear
                     }
                 })
                 model.lowTrim = await Trim.findOne({
@@ -2181,13 +2176,13 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
             trim.minPrice = await Trim.min("price", {
                 where: {
                     model: trim.model,
-                    // year: trim.year,
+                    year: trim.year,
                 }
             })
             trim.maxPrice = await Trim.max("price", {
                 where: {
                     model: trim.model,
-                    // year: trim.year
+                    year: trim.year
                 }
             })
             trim.allTrimsCount = await Trim.count({
