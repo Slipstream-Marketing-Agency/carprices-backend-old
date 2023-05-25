@@ -232,7 +232,7 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
                     return tag;
                 })
             )
-            blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
+            blog.author = await Admin.findByPk(blog.author, { attributes: ["id", "username", "firstName", "lastName", "image"] })
             return blog;
         })
     )
@@ -241,6 +241,69 @@ module.exports.getAdminBlogs = asyncHandler(async (req, res, next) => {
     res
         .status(200)
         .json({ blogs: blogs.rows, blogsCount: blogs.count, totalPage: Math.ceil(blogs.count / pageSize) });
+});
+
+module.exports.getAdminBlogById = asyncHandler(async (req, res, next) => {
+
+    const { id } = req.params;
+
+    let blog = await Blog.findByPk(id);
+
+    blog.brands = await BlogBrand.findAll({
+        where: {
+            blogId: blog.id
+        },
+        raw: true
+    });
+    blog.brands = await Promise.all(
+        blog.brands.map(async brand => {
+            brand = await CarBrand.findByPk(brand.brandId);
+            return brand;
+        })
+    )
+    blog.categories = await BlogCategory.findAll({
+        where: {
+            blogId: blog.id
+        },
+        raw: true
+    });
+    blog.categories = await Promise.all(
+        blog.categories.map(async category => {
+            category = await Category.findByPk(category.categoryId);
+            return category;
+        })
+    )
+    blog.models = await BlogModel.findAll({
+        where: {
+            blogId: blog.id
+        },
+        raw: true
+    });
+    blog.models = await Promise.all(
+        blog.models.map(async model => {
+            model = await Model.findByPk(model.modelId);
+            return model;
+        })
+    )
+    blog.tags = await BlogTag.findAll({
+        where: {
+            blogId: blog.id
+        },
+        raw: true
+    });
+    blog.tags = await Promise.all(
+        blog.tags.map(async tag => {
+            tag = await Tag.findByPk(tag.tagId);
+            return tag;
+        })
+    )
+    blog.author = await Admin.findByPk(blog.author, { attributes: ["id", "username", "firstName", "lastName", "image"] })
+
+
+
+    res
+        .status(200)
+        .json({ blog });
 });
 
 module.exports.getBlogs = asyncHandler(async (req, res, next) => {
@@ -335,7 +398,7 @@ module.exports.getBlogs = asyncHandler(async (req, res, next) => {
                     return tag;
                 })
             )
-            blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
+            blog.author = await Admin.findByPk(blog.author, { attributes: ["id", "username", "firstName", "lastName", "image"] })
             return blog;
         })
     )
@@ -370,12 +433,12 @@ module.exports.getBlogsMin = asyncHandler(async (req, res, next) => {
 
     let conditions = {
         raw: true,
-        attributes: ['id','title', 'slug'],
+        attributes: ['id', 'title', 'slug'],
         where
     };
     if (!isAll) {
         conditions = {
-            attributes: ['id','title', 'slug'],
+            attributes: ['id', 'title', 'slug'],
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,
@@ -430,7 +493,7 @@ module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
     let categoryData = await Category.findOne({
         where: {
             title: {
-                [Op.iLike]: "%"+modelData.name+"%"
+                [Op.iLike]: "%" + modelData.name + "%"
             },
         },
         raw: true
@@ -528,7 +591,7 @@ module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
                     return tag;
                 })
             )
-            blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
+            blog.author = await Admin.findByPk(blog.author, { attributes: ["id", "username", "firstName", "lastName", "image"] })
             return blog;
         })
     )
@@ -576,7 +639,7 @@ module.exports.getBlogsByBrand = asyncHandler(async (req, res, next) => {
     let categoryData = await Category.findOne({
         where: {
             title: {
-                [Op.iLike]: "%"+brandData.name+"%"
+                [Op.iLike]: "%" + brandData.name + "%"
             },
         },
         raw: true
@@ -674,7 +737,7 @@ module.exports.getBlogsByBrand = asyncHandler(async (req, res, next) => {
                     return tag;
                 })
             )
-            blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
+            blog.author = await Admin.findByPk(blog.author, { attributes: ["id", "username", "firstName", "lastName", "image"] })
             return blog;
         })
     )
@@ -792,7 +855,7 @@ module.exports.getBlogsByTag = asyncHandler(async (req, res, next) => {
                     return tag;
                 })
             )
-            blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
+            blog.author = await Admin.findByPk(blog.author, { attributes: ["id", "username", "firstName", "lastName", "image"] })
             return blog;
         })
     )
@@ -863,7 +926,7 @@ module.exports.getBlogBySlug = asyncHandler(async (req, res, next) => {
             return tag;
         })
     )
-    blog.author = await Admin.findByPk(blog.author, {attributes: ["id", "username", "firstName", "lastName", "image"]})
+    blog.author = await Admin.findByPk(blog.author, { attributes: ["id", "username", "firstName", "lastName", "image"] })
 
     res
         .status(200)
@@ -963,6 +1026,41 @@ module.exports.updateBlogCategory = asyncHandler(async (req, res, next) => {
     await redisClient.del("blogCategory");
 
     res.status(201).json({ message: "Category Updated" });
+});
+
+module.exports.getAdminBlogTags = asyncHandler(async (req, res, next) => {
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {};
+    if (query.search) {
+        where.title = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {};
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy
+        }
+    }
+
+    let tags = { rows: [], count: 0 };
+
+    tags = await Tag.findAndCountAll(conditions);
+
+    res
+        .status(200)
+        .json({ tags: tags.rows, tagsCount: tags.count, totalPage: Math.ceil(tags.count / pageSize) });
 });
 
 const fieldValidation = (field, next) => {
