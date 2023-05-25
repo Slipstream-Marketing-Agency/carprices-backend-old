@@ -1562,7 +1562,7 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
                 raw: true
             })
             trim.model = await Model.findByPk(trim.model, {
-                attributes: ["id", "name"]
+                attributes: ["id", "name", "slug"]
             });
             trim.images = await TrimImages.findAll({
                 where: {
