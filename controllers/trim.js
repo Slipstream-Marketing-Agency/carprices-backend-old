@@ -906,6 +906,7 @@ module.exports.getTrimMinMaxFilterPriceDynamic = asyncHandler(async (req, res, n
         year: { [Op.gte]: new Date().getFullYear() }
     };
 
+
     if (body.price && body.price.length != 0) {
         where.price = {}
         body.price.map(price => {
@@ -999,6 +1000,41 @@ module.exports.getTrimMinMaxFilterPriceDynamic = asyncHandler(async (req, res, n
         where.isElectric = true
     }
 
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
+    }
+
     const min = await Trim.min("price", {
         where
 
@@ -1041,7 +1077,7 @@ module.exports.getTrimMinMaxFilterPower = asyncHandler(async (req, res, next) =>
 
 module.exports.getTrimMinMaxFilterPowerDynamic = asyncHandler(async (req, res, next) => {
 
-    const { body } = req;
+    const { body, query } = req;
 
     let where = {
         year: { [Op.gte]: new Date().getFullYear() }
@@ -1098,6 +1134,81 @@ module.exports.getTrimMinMaxFilterPowerDynamic = asyncHandler(async (req, res, n
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
     }
 
     const min = await Trim.min("power", {
@@ -1142,7 +1253,7 @@ module.exports.getTrimMinMaxFilterTorque = asyncHandler(async (req, res, next) =
 
 module.exports.getTrimMinMaxFilterTorqueDynamic = asyncHandler(async (req, res, next) => {
 
-    const { body } = req;
+    const { body, query } = req;
 
     let where = {
         year: { [Op.gte]: new Date().getFullYear() }
@@ -1199,6 +1310,81 @@ module.exports.getTrimMinMaxFilterTorqueDynamic = asyncHandler(async (req, res, 
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
     }
 
     const min = await Trim.min("torque", {
@@ -1243,7 +1429,7 @@ module.exports.getTrimMinMaxFilterDisplacement = asyncHandler(async (req, res, n
 
 module.exports.getTrimMinMaxFilterDisplacementDynamic = asyncHandler(async (req, res, next) => {
 
-    const { body } = req;
+    const { body, query } = req;
 
     let where = {
         year: { [Op.gte]: new Date().getFullYear() }
@@ -1300,6 +1486,81 @@ module.exports.getTrimMinMaxFilterDisplacementDynamic = asyncHandler(async (req,
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
     }
 
     const min = await Trim.min("displacement", {
@@ -1392,6 +1653,11 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
         seatingCapacity.push("9 Seater")
     }
 
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
+    }
 
     where.price = {}
 
@@ -1409,12 +1675,7 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
         }
     }
 
-    seatingCapacity = [...new Set(seatingCapacity)]
-
-    if (seatingCapacity.length !== 0) {
-
-        where.seatingCapacity = { [Op.or]: seatingCapacity }
-    }
+    
 
     let isAll = query.isAll ?? false;
 
@@ -1624,7 +1885,7 @@ module.exports.getTrimsBodyType = asyncHandler(async (req, res, next) => {
 
 module.exports.getTrimsBodyTypeDynamic = asyncHandler(async (req, res, next) => {
 
-    const { body } = req;
+    const { body, query } = req;
 
     let where = {
         year: { [Op.gte]: new Date().getFullYear() }
@@ -1681,6 +1942,81 @@ module.exports.getTrimsBodyTypeDynamic = asyncHandler(async (req, res, next) => 
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
     }
 
     let bodyType = await Trim.findAll({
@@ -1715,7 +2051,7 @@ module.exports.getTrimsFuelType = asyncHandler(async (req, res, next) => {
 
 module.exports.getTrimsFuelTypeDynamic = asyncHandler(async (req, res, next) => {
 
-    const { body } = req;
+    const { body, query } = req;
 
     let where = {
         year: { [Op.gte]: new Date().getFullYear() }
@@ -1772,6 +2108,81 @@ module.exports.getTrimsFuelTypeDynamic = asyncHandler(async (req, res, next) => 
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
     }
 
     let fuelType = await Trim.findAll({
@@ -1806,7 +2217,7 @@ module.exports.getTrimsTransmissions = asyncHandler(async (req, res, next) => {
 
 module.exports.getTrimsTransmissionsDynamic = asyncHandler(async (req, res, next) => {
 
-    const { body } = req;
+    const { body, query } = req;
 
     let where = {
         year: { [Op.gte]: new Date().getFullYear() }
@@ -1863,6 +2274,81 @@ module.exports.getTrimsTransmissionsDynamic = asyncHandler(async (req, res, next
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
     }
 
     let transmission = await Trim.findAll({
@@ -1897,7 +2383,7 @@ module.exports.getTrimsCylinderNo = asyncHandler(async (req, res, next) => {
 
 module.exports.getTrimsCylinderNoDynamic = asyncHandler(async (req, res, next) => {
 
-    const { body } = req;
+    const { body, query } = req;
 
     let where = {
         year: { [Op.gte]: new Date().getFullYear() }
@@ -1956,6 +2442,81 @@ module.exports.getTrimsCylinderNoDynamic = asyncHandler(async (req, res, next) =
         where.cylinders = cylinders
     }
 
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
+    }
+
     let cylinders = await Trim.findAll({
         attributes: ['cylinders'],
         group: ['cylinders'],
@@ -1976,6 +2537,81 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     let where = {
         year: { [Op.gte]: new Date().getFullYear() }
     };
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
+    }
 
     if (body.price && body.price.length != 0) {
         where.price = {}
@@ -2267,11 +2903,86 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 
 module.exports.getCarBrandsDynamic = asyncHandler(async (req, res, next) => {
 
-    const { body } = req;
+    const { body, query } = req;
 
     let where = {
         year: { [Op.gte]: new Date().getFullYear() }
     };
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
+    }
 
     if (body.price && body.price.length != 0) {
         where.price = {}
