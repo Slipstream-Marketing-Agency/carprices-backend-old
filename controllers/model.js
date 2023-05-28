@@ -977,7 +977,8 @@ module.exports.getFeaturedModels = asyncHandler(async (req, res, next) => {
     ] : null;
     let where = {
         published: true,
-        isFeatured: true
+        id: [510, 312, 276, 181, 68, 363, 411, 101]
+        // isFeatured: true
     };
     if (query.search) {
         where.name = { [Op.iLike]: `%${query.search}%` }
@@ -1208,9 +1209,9 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
         [query.orderBy, "ASC"]
     ] : null;
     let where = {
-        id: [79, 333, 209, 210, 246, 376],
-        published: true,
-        isElectric: true
+        id: [482, 520, 375, 78, 445, 21, 246, 128],
+        // published: true,
+        // isElectric: true
     };
     if (query.search) {
         where.name = { [Op.iLike]: `%${query.search}%` }
@@ -1887,7 +1888,7 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
     let currentPage = 1;
     let where = {
         published: true,
-        id: [1, 2, 4, 6, 7, 8, 10, 12]
+        id: [415, 500, 408, 490, 11, 370, 511, 401]
     };
 
     let conditions = {
@@ -1962,7 +1963,7 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
 
 module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
 
-    const compareListIds = [{ v1: 1, v2: 2 }, { v1: 3, v2: 4 }, { v1: 5, v2: 6 }]
+    const compareListIds = [{ v1: 415, v2: 500 }, { v1: 511, v2: 401 }, { v1: 68, v2: 363 }]
 
     let models = []
 
