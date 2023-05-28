@@ -138,6 +138,22 @@ module.exports.updateBrand = asyncHandler(async (req, res, next) => {
     res.status(201).json({ brand });
 });
 
+module.exports.getPopularCarBrand = asyncHandler(async (req, res, next) => {
+    let where = {
+        id: [44, 24, 66, 61, 21, 32, 28, 59, 57, 50, 45, 64]
+    };
+
+    let brands = { rows: [], count: 0 };
+
+    brands = await CarBrand.findAndCountAll({
+        where
+    });
+
+    res
+        .status(200)
+        .json({ brands: brands.rows, brandsCount: brands.count });
+});
+
 const fieldValidation = (field, next) => {
     if (!field) {
         return next(new ErrorResponse(`Missing fields`, 400));
