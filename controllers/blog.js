@@ -1063,6 +1063,125 @@ module.exports.getAdminBlogTags = asyncHandler(async (req, res, next) => {
         .json({ tags: tags.rows, tagsCount: tags.count, totalPage: Math.ceil(tags.count / pageSize) });
 });
 
+module.exports.getBlogsByTags = asyncHandler(async (req, res, next) => {
+
+    const { tags } = req.body;
+    const { query } = req;
+
+    let blogsByTag = await BlogTag.findAll(
+        {
+            where: {
+                tagId: tags
+            },
+            raw: true
+        }
+    )
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let type = query.type ?? "news";
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : [
+        ["publishedAt", "DESC"]
+    ];
+
+    let blogIds = blogsByTag.map(blog => {
+        return blog.blogId
+    })
+
+    let where = {
+        id: blogIds,
+        type,
+        published: true
+    };
+    if (query.search) {
+        where.title = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        attributes: { exclude: ['content'] },
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            attributes: { exclude: ['content'] },
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let blogs = { rows: [], count: 0 };
+
+    blogs = await Blog.findAndCountAll(conditions);
+
+    blogs.rows = await Promise.all(
+        blogs.rows.map(async blog => {
+            // blog.brands = await BlogBrand.findAll({
+            //     where: {
+            //         blogId: blog.id
+            //     },
+            //     raw: true
+            // });
+            // blog.brands = await Promise.all(
+            //     blog.brands.map(async brand => {
+            //         brand = await CarBrand.findByPk(brand.brandId);
+            //         return brand;
+            //     })
+            // )
+            // blog.categories = await BlogCategory.findAll({
+            //     where: {
+            //         blogId: blog.id
+            //     },
+            //     raw: true
+            // });
+            // blog.categories = await Promise.all(
+            //     blog.categories.map(async category => {
+            //         category = await Category.findByPk(category.categoryId);
+            //         return category;
+            //     })
+            // )
+            // blog.models = await BlogModel.findAll({
+            //     where: {
+            //         blogId: blog.id
+            //     },
+            //     raw: true
+            // });
+            // blog.models = await Promise.all(
+            //     blog.models.map(async model => {
+            //         model = await Model.findByPk(model.modelId);
+            //         return model;
+            //     })
+            // )
+            // blog.tags = await BlogTag.findAll({
+            //     where: {
+            //         blogId: blog.id
+            //     },
+            //     raw: true
+            // });
+            // blog.tags = await Promise.all(
+            //     blog.tags.map(async tag => {
+            //         tag = await Tag.findByPk(tag.tagId);
+            //         return tag;
+            //     })
+            // )
+            blog.author = await Admin.findByPk(blog.author, { attributes: ["id", "username", "firstName", "lastName", "image"] })
+            return blog;
+        })
+    )
+
+
+    res
+        .status(200)
+        .json({ blogs: blogs.rows, blogsCount: blogs.count, totalPage: Math.ceil(blogs.count / pageSize) });
+});
+
 const fieldValidation = (field, next) => {
     if (!field) {
         return new ErrorResponse(`Missing fields`, 400);

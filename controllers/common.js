@@ -12,6 +12,7 @@ const {
 const redisClient = require("../util/caching");
 const sequelize = require("../util/database");
 const Model = require("../models/Model");
+const ContactForm = require("../models/ContactForm");
 
 const includeOptions = [
   // {
@@ -99,25 +100,108 @@ module.exports.mainSearch = asyncHandler(async (req, res, next) => {
   let words = keyword.split(" ")
   console.log('www ', words);
   if (words.length == 2) {
-    first_word = words[0]+'%'
-    second_word = words[1]+'%'
-  }else{
-    first_word = words[0]+'%'
-    second_word = words[0]+'%'
+    first_word = words[0] + '%'
+    second_word = words[1] + '%'
+  } else {
+    first_word = words[0] + '%'
+    second_word = words[0] + '%'
   }
 
-  let search = await sequelize.query(
-    'SELECT m.name as modelName, b.name as brandName, t.name as trimName, m.id as modelId, b.id as brandId, t.id as trimId, m.slug as modelSlug, b.slug as brandSlug, t.slug as trimSlug, * FROM trims as t, models as m, car_brands as b WHERE t.model = m.id AND m.brand = b.id AND (b.name ILIKE :search_name OR m.name ILIKE :search_name OR t.name ILIKE :search_name OR b.name ILIKE :first_word OR m.name ILIKE :second_word) LIMIT 5',
-    {
-      replacements: { search_name: keyword+'%', first_word, second_word },
-      type: QueryTypes.SELECT
+  let searchBrand = await CarBrand.findAll({
+    where: {
+      [Op.or]: keyword.split(" ").map(word => ({
+        name: {
+          [Op.iLike]: word + "%"
+        }
+      }))
+    },
+    limit: 8,
+    raw: true
+  })
+
+  searchBrand = searchBrand.map(item => ({ ...item, type: "brand" }))
+
+  let searchModelWithName = await Model.findAll({
+    attributes: ["id", "name", "slug", "brand"],
+    where: {
+      [Op.or]: keyword.split(" ").map(word => ({
+        name: {
+          [Op.iLike]: word + "%"
+        }
+      })),
+    },
+    limit: 8,
+    raw: true
+  })
+
+  let brandWhere = {
+    [Op.or]: searchBrand.map(brand => ({
+      brand: brand.id
+    })),
+  }
+  if (searchModelWithName.length != 0) {
+    brandWhere.id = {
+      [Op.and]: searchModelWithName.map(model => ({
+        [Op.ne]: model.id
+      }))
     }
-  );
+  }
+
+
+  let searchModelWithBrand = await Model.findAll({
+    attributes: ["id", "name", "slug", "brand"],
+    where: brandWhere,
+    limit: 8,
+    raw: true
+  })
+
+  let searchModel = searchModelWithName.concat(searchModelWithBrand)
+
+  searchModel = await Promise.all(
+    searchModel.map(async item => {
+      item.brand = await CarBrand.findByPk(item.brand)
+      item.type = "model"
+      return item;
+    })
+  )
+
+
+  // let searchTrim = await sequelize.query(
+  //   'SELECT m.name as modelName, b.name as brandName, t.name as trimName, m.id as modelId, b.id as brandId, t.id as trimId, m.slug as modelSlug, b.slug as brandSlug, t.slug as trimSlug, * FROM trims as t, models as m, car_brands as b WHERE t.model = m.id AND m.brand = b.id AND (b.name ILIKE :search_name OR m.name ILIKE :search_name OR t.name ILIKE :search_name OR b.name ILIKE :first_word OR m.name ILIKE :second_word OR b.name ILIKE :second_word OR m.name ILIKE :first_word) LIMIT 5',
+  //   {
+  //     replacements: { search_name: keyword+'%', first_word, second_word },
+  //     type: QueryTypes.SELECT
+  //   }
+  // );
+
+  // searchTrim = searchTrim.map()
+
+  let search = searchBrand.concat(searchModel)
 
   res.status(200).json({
     search
   })
 
+});
+
+module.exports.contactFormSubmit = asyncHandler(async (req, res, next) => {
+  const {
+    name,
+    email,
+    mobile,
+    subject,
+    message,
+  } = req.body.contact;
+
+  await ContactForm.create({
+    name,
+    email,
+    mobile,
+    subject,
+    message,
+  });
+
+  res.status(201).json({message: "Contact form submitted"});
 });
 
 const fieldValidation = (field, next) => {

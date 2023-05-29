@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getCarBrands, mainSearch,
+  getCarBrands, mainSearch, contactFormSubmit,
 } = require("../controllers/common");
 const { getTrimMinMaxFilterPrice, getTrimMinMaxFilterPower, getTrimMinMaxFilterTorque, getTrimMinMaxFilterPriceDynamic, getTrimMinMaxFilterPowerDynamic, getTrimMinMaxFilterTorqueDynamic, getTrimMinMaxFilterDisplacementDynamic, getTrimMinMaxFilterDisplacement, getCarBrandsDynamic } = require("../controllers/trim");
 const { protect } = require("../middlewares/auth");
@@ -12,5 +12,6 @@ router.route("/filter/power/get-min-max").get(getTrimMinMaxFilterPower).post(get
 router.route("/filter/torque/get-min-max").get(getTrimMinMaxFilterTorque).post(getTrimMinMaxFilterTorqueDynamic);
 router.route("/filter/displacement/get-min-max").get(getTrimMinMaxFilterDisplacement).post(getTrimMinMaxFilterDisplacementDynamic);
 router.route("/search/:keyword").get(mainSearch);
+router.route("/contact-form").post(contactFormSubmit)
 
 module.exports = router;

@@ -116,7 +116,7 @@ module.exports.getAdminModels = asyncHandler(async (req, res, next) => {
             })
             await Model.update({
                 year: model.highestYear || 2023
-            },{
+            }, {
                 where: {
                     id: model.id
                 }
@@ -138,8 +138,25 @@ module.exports.getAdminModelByBrand = asyncHandler(async (req, res, next) => {
     let models = await Model.findAll({
         where: {
             brand
-        }
+        },
+        raw: true
     });
+
+    models = await Promise.all(
+        models.map(async model => {
+            if (model.highTrim) {
+                model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
+            } else {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id
+                    },
+                    raw: true
+                });
+            }
+            return model
+        })
+    )
 
     res
         .status(200)
@@ -1745,29 +1762,29 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
 
     model.brand = await CarBrand.findByPk(model.brand);
 
-    model.mainTrim = await Trim.findOne({
-        where: {
-            model: model.id,
-            year
-        },
-        raw: true
-    });
-    if (model.mainTrim) {
-        model.mainTrim.images = await TrimImages.findAll({
-            where: {
-                trimId: model.mainTrim?.id
-            }
-        })
-        model.mainTrim.videos = await TrimVideos.findAll({
-            where: {
-                trimId: model.mainTrim?.id
-            }
-        })
+    if (model.highTrim) {
+        model.mainTrim = await Trim.findByPk(model.highTrim);
     } else {
-        return res.status(404).json({
-            message: "Trim not found"
-        })
+        model.mainTrim = await Trim.findOne({
+            where: {
+                model: model.id,
+                year
+            },
+            raw: true
+        });
+
     }
+
+    model.mainTrim.images = await TrimImages.findAll({
+        where: {
+            trimId: model.mainTrim?.id
+        }
+    })
+    model.mainTrim.videos = await TrimVideos.findAll({
+        where: {
+            trimId: model.mainTrim?.id
+        }
+    })
 
 
 
