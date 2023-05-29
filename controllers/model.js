@@ -1763,7 +1763,16 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
     model.brand = await CarBrand.findByPk(model.brand);
 
     if (model.highTrim) {
-        model.mainTrim = await Trim.findByPk(model.highTrim);
+        model.mainTrim = await Trim.findByPk(model.highTrim, {raw: true});
+        console.log("model.mainTrim ", model.mainTrim);
+        model.mainTrim = await Trim.findOne({
+            where: {
+                slug: model.mainTrim.slug,
+                year
+            },
+            raw: true
+        });
+        console.log("model.mainTrim ", model.mainTrim);
     } else {
         model.mainTrim = await Trim.findOne({
             where: {

@@ -938,7 +938,7 @@ module.exports.createBlogCategory = asyncHandler(async (req, res, next) => {
         title,
         metaTitle,
         content,
-    } = req.body.cateogry;
+    } = req.body.category;
 
     fieldValidation(title, next);
     // fieldValidation(metaTitle, next);
