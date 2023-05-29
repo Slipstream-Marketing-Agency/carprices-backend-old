@@ -13,6 +13,7 @@ const redisClient = require("../util/caching");
 const sequelize = require("../util/database");
 const Model = require("../models/Model");
 const ContactForm = require("../models/ContactForm");
+const Trim = require("../models/Trim");
 
 const includeOptions = [
   // {
@@ -122,7 +123,7 @@ module.exports.mainSearch = asyncHandler(async (req, res, next) => {
   searchBrand = searchBrand.map(item => ({ ...item, type: "brand" }))
 
   let searchModelWithName = await Model.findAll({
-    attributes: ["id", "name", "slug", "brand"],
+    attributes: ["id", "name", "slug", "brand", "highTrim"],
     where: {
       [Op.or]: keyword.split(" ").map(word => ({
         name: {
@@ -149,7 +150,7 @@ module.exports.mainSearch = asyncHandler(async (req, res, next) => {
 
 
   let searchModelWithBrand = await Model.findAll({
-    attributes: ["id", "name", "slug", "brand"],
+    attributes: ["id", "name", "slug", "brand", "highTrim"],
     where: brandWhere,
     limit: 8,
     raw: true
@@ -158,10 +159,21 @@ module.exports.mainSearch = asyncHandler(async (req, res, next) => {
   let searchModel = searchModelWithName.concat(searchModelWithBrand)
 
   searchModel = await Promise.all(
-    searchModel.map(async item => {
-      item.brand = await CarBrand.findByPk(item.brand)
-      item.type = "model"
-      return item;
+    searchModel.map(async model => {
+      model.brand = await CarBrand.findByPk(model.brand)
+      model.type = "model"
+      if (model.highTrim) {
+        model.mainTrim = await Trim.findByPk(model.highTrim, { attributes: ["id", "name", "slug", "mainSlug", "year"], raw: true });
+      } else {
+        model.mainTrim = await Trim.findOne({
+          attributes: ["id", "name", "slug", "mainSlug", "year"],
+          where: {
+            model: model.id
+          },
+          raw: true
+        });
+      }
+      return model;
     })
   )
 
@@ -201,7 +213,7 @@ module.exports.contactFormSubmit = asyncHandler(async (req, res, next) => {
     message,
   });
 
-  res.status(201).json({message: "Contact form submitted"});
+  res.status(201).json({ message: "Contact form submitted" });
 });
 
 const fieldValidation = (field, next) => {
