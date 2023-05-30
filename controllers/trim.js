@@ -960,6 +960,10 @@ module.exports.getTrimMinMaxFilterPriceDynamic = asyncHandler(async (req, res, n
         where.cylinders = cylinders
     }
 
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
+    }
+
     if (query.isLuxury) {
         where.isLuxury = true
     }
@@ -1134,6 +1138,10 @@ module.exports.getTrimMinMaxFilterPowerDynamic = asyncHandler(async (req, res, n
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
     }
 
     if (query.isLuxury) {
@@ -1312,6 +1320,10 @@ module.exports.getTrimMinMaxFilterTorqueDynamic = asyncHandler(async (req, res, 
         where.cylinders = cylinders
     }
 
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
+    }
+
     if (query.isLuxury) {
         where.isLuxury = true
     }
@@ -1486,6 +1498,10 @@ module.exports.getTrimMinMaxFilterDisplacementDynamic = asyncHandler(async (req,
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
     }
 
     if (query.isLuxury) {
@@ -1944,6 +1960,10 @@ module.exports.getTrimsBodyTypeDynamic = asyncHandler(async (req, res, next) => 
         where.cylinders = cylinders
     }
 
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
+    }
+
     if (query.isLuxury) {
         where.isLuxury = true
     }
@@ -2108,6 +2128,10 @@ module.exports.getTrimsFuelTypeDynamic = asyncHandler(async (req, res, next) => 
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
     }
 
     if (query.isLuxury) {
@@ -2276,6 +2300,10 @@ module.exports.getTrimsTransmissionsDynamic = asyncHandler(async (req, res, next
         where.cylinders = cylinders
     }
 
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
+    }
+
     if (query.isLuxury) {
         where.isLuxury = true
     }
@@ -2442,6 +2470,10 @@ module.exports.getTrimsCylinderNoDynamic = asyncHandler(async (req, res, next) =
         where.cylinders = cylinders
     }
 
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
+    }
+
     if (query.isLuxury) {
         where.isLuxury = true
     }
@@ -2528,6 +2560,176 @@ module.exports.getTrimsCylinderNoDynamic = asyncHandler(async (req, res, next) =
     res
         .status(200)
         .json({ cylinders });
+});
+
+module.exports.getTrimsDriveType = asyncHandler(async (req, res, next) => {
+
+    let driveTypes = await Trim.findAll({
+        attributes: ['drive'],
+        group: ['drive'],
+        where: {
+            year: { [Op.gte]: new Date().getFullYear() }
+        }
+    });
+
+    driveTypes = driveTypes.map(item => item.drive)
+
+    res
+        .status(200)
+        .json({ driveTypes });
+});
+
+module.exports.getTrimsDriveTypeDynamic = asyncHandler(async (req, res, next) => {
+
+    const { body, query } = req;
+
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() }
+    };
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
+    }
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
+    }
+
+    let driveTypes = await Trim.findAll({
+        attributes: ['drive'],
+        group: ['drive'],
+        where
+    });
+
+    driveTypes = driveTypes.map(item => item.drive)
+
+    res
+        .status(200)
+        .json({ driveTypes });
 });
 
 module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) => {
@@ -2698,6 +2900,10 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     if (body.cylinders && body.cylinders.length != 0) {
         let cylinders = body.cylinders.map((item) => String(item))
         where.cylinders = cylinders
+    }
+
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
     }
 
     let isAll = query.isAll ?? false;
@@ -3037,6 +3243,10 @@ module.exports.getCarBrandsDynamic = asyncHandler(async (req, res, next) => {
         where.cylinders = cylinders
     }
 
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
+    }
+
     let brand = await Trim.findAll({
         attributes: ['brand'],
         group: ['brand'],
@@ -3121,64 +3331,61 @@ module.exports.changeTrimData = asyncHandler(async (req, res, next) => {
 
     let missingItem = []
 
-    // try {
-        await Promise.all(
-            trimItems.map(async trimItem => {
-                let brand = await CarBrand.findOne({
-                    where: {
-                        name: trimItem.make
-                    }
-                })
-                if (!brand) {
-                    missingItem.push(trimItem)
-                    return
-                }
-                let model = await Model.findOne({
-                    where: {
-                        name: String(trimItem.car) 
-                    }
-                })
-                if (!model) {
-                    missingItem.push(trimItem)
-                    return
-                }
-                let trimData = await Trim.findOne({
-                    where: {
-                        name: String(trimItem.trim_name),
-                        model: model.id,
-                        brand: brand.id,
-                        year: trimItem.year
-                    }
-                })
-                if (trimData) {
-                    foundItems.push(trimData.id)
-                    trimData.engine = trimItem['Engine Type'] 
-                    trimData.frontBrakes = trimItem.front_brakes
-                    trimData.rearBrakes = trimItem.rear_brakes
-                    trimData['length'] = trimItem['length']
-                    trimData.width = trimItem.width
-                    trimData.height = trimItem.height
-                    trimData.oldPath = trimItem.Slug
-                    trimData.fuelConsumption = trimItem['fuel_consumption kmpl']
-                    trimData.wheelbase = trimItem.wheelbase
-                    trimData.save();
-                } else {
-                    missingItem.push(trimItem)
+    await Promise.all(
+        trimItems.map(async trimItem => {
+            let brand = await CarBrand.findOne({
+                where: {
+                    name: trimItem.make
                 }
             })
-        )
+            if (!brand) {
+                missingItem.push(trimItem)
+                return
+            }
+            let model = await Model.findOne({
+                where: {
+                    name: String(trimItem.car)
+                }
+            })
+            if (!model) {
+                missingItem.push(trimItem)
+                return
+            }
+            let trimData = await Trim.findOne({
+                where: {
+                    name: String(trimItem.trim_name),
+                    model: model.id,
+                    brand: brand.id,
+                    year: trimItem.year
+                }
+            })
+            if (trimData) {
+                foundItems.push(trimData.id)
+                trimData.engine = trimItem['Engine Type']
+                trimData.frontBrakes = trimItem.front_brakes
+                trimData.rearBrakes = trimItem.rear_brakes
+                trimData['length'] = trimItem['length']
+                trimData.width = trimItem.width
+                trimData.height = trimItem.height
+                trimData.oldPath = trimItem.Slug
+                trimData.fuelConsumption = trimItem['fuel_consumption kmpl']
+                trimData.wheelbase = trimItem.wheelbase
+                trimData.save();
+            } else {
+                missingItem.push(trimItem)
+            }
+        })
+    )
 
-        res
+    res
         .status(200)
         .json({ foundItems, missingItem, foundItemsCount: foundItems.length, missingItemCount: missingItem.length });
-    // } catch (error) {
-    //     console.log("Eee ", error);
-    // }
     
 
 
 
-    
+
+
 });
 
 const fieldValidation = (field, next) => {
