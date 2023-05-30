@@ -1892,8 +1892,6 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
         })
     )
 
-
-
     model.allYearMainTrims = await Trim.findAll({
         attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {

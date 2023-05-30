@@ -16,3 +16,6 @@ ALTER TABLE public.car_brands ADD coverImage varchar(255) NULL;
 # 22/05/2023
 update trims t set "bodyType" = 'Sedan' where "bodyType"  = 'SEdan';
 update trims t set "bodyType" = 'Pick-Up' where "bodyType"  = 'Pick-up';
+
+# 30/05/2023
+ALTER TABLE public.trims ADD oldPath varchar(255) NULL;

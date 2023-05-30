@@ -1675,7 +1675,7 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
         }
     }
 
-    
+
 
     let isAll = query.isAll ?? false;
 
@@ -3111,6 +3111,74 @@ module.exports.getCompareTrims = asyncHandler(async (req, res, next) => {
     res
         .status(200)
         .json({ trims });
+});
+
+module.exports.changeTrimData = asyncHandler(async (req, res, next) => {
+
+    const trimItems = req.body;
+
+    let foundItems = []
+
+    let missingItem = []
+
+    // try {
+        await Promise.all(
+            trimItems.map(async trimItem => {
+                let brand = await CarBrand.findOne({
+                    where: {
+                        name: trimItem.make
+                    }
+                })
+                if (!brand) {
+                    missingItem.push(trimItem)
+                    return
+                }
+                let model = await Model.findOne({
+                    where: {
+                        name: String(trimItem.car) 
+                    }
+                })
+                if (!model) {
+                    missingItem.push(trimItem)
+                    return
+                }
+                let trimData = await Trim.findOne({
+                    where: {
+                        name: String(trimItem.trim_name),
+                        model: model.id,
+                        brand: brand.id,
+                        year: trimItem.year
+                    }
+                })
+                if (trimData) {
+                    foundItems.push(trimData.id)
+                    trimData.engine = trimItem['Engine Type'] 
+                    trimData.frontBrakes = trimItem.front_brakes
+                    trimData.rearBrakes = trimItem.rear_brakes
+                    trimData['length'] = trimItem['length']
+                    trimData.width = trimItem.width
+                    trimData.height = trimItem.height
+                    trimData.oldPath = trimItem.Slug
+                    trimData.fuelConsumption = trimItem['fuel_consumption kmpl']
+                    trimData.wheelbase = trimItem.wheelbase
+                    trimData.save();
+                } else {
+                    missingItem.push(trimItem)
+                }
+            })
+        )
+
+        res
+        .status(200)
+        .json({ foundItems, missingItem, foundItemsCount: foundItems.length, missingItemCount: missingItem.length });
+    // } catch (error) {
+    //     console.log("Eee ", error);
+    // }
+    
+
+
+
+    
 });
 
 const fieldValidation = (field, next) => {
