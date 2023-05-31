@@ -358,7 +358,8 @@ module.exports.getModels = asyncHandler(async (req, res, next) => {
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     },
                     raw: true
                 });
@@ -542,7 +543,8 @@ module.exports.getModelsByBrand = asyncHandler(async (req, res, next) => {
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     }
                 });
                 // if (model.mainTrim) {
@@ -636,7 +638,8 @@ module.exports.getModelsByBrandSlug = asyncHandler(async (req, res, next) => {
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     }
                 });
                 // if (model.mainTrim) {
@@ -721,7 +724,8 @@ module.exports.getModelsByBrandAndYear = asyncHandler(async (req, res, next) => 
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     }
                 });
                 // if (model.mainTrim) {
@@ -816,7 +820,8 @@ module.exports.getModelsByBrandAndYearSlug = asyncHandler(async (req, res, next)
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     }
                 });
                 // if (model.mainTrim) {
@@ -838,7 +843,8 @@ module.exports.getModelsByBrandAndYearSlug = asyncHandler(async (req, res, next)
                 model.mainTrim = await Trim.findOne({
                     where: {
                         model: model.id,
-                        year
+                        year,
+                        published: true
                     }
                 });
             }
@@ -1038,7 +1044,8 @@ module.exports.getFeaturedModels = asyncHandler(async (req, res, next) => {
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     }
                 });
                 // if (model.mainTrim) {
@@ -1058,14 +1065,16 @@ module.exports.getFeaturedModels = asyncHandler(async (req, res, next) => {
             model.minPrice = await Trim.min("price", {
                 where: {
                     model: model.id,
-                    year: model.mainTrim.year
+                    year: model.mainTrim.year,
+                    published: true
                 }
             });
 
             model.maxPrice = await Trim.max("price", {
                 where: {
                     model: model.id,
-                    year: model.mainTrim.year
+                    year: model.mainTrim.year,
+                    published: true
                 }
             });
 
@@ -1270,7 +1279,8 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     }
                 });
                 // if (model.mainTrim) {
@@ -1290,14 +1300,16 @@ module.exports.getElectricFeaturedModels = asyncHandler(async (req, res, next) =
             model.minPrice = await Trim.min("price", {
                 where: {
                     model: model.id,
-                    year: model.mainTrim.year
+                    year: model.mainTrim.year,
+                    published: true
                 }
             });
 
             model.maxPrice = await Trim.max("price", {
                 where: {
                     model: model.id,
-                    year: model.mainTrim.year
+                    year: model.mainTrim.year,
+                    published: true
                 }
             });
 
@@ -1346,7 +1358,8 @@ module.exports.getSpecificModels = asyncHandler(async (req, res, next) => {
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     }
                 });
                 // if (model.mainTrim) {
@@ -1366,14 +1379,16 @@ module.exports.getSpecificModels = asyncHandler(async (req, res, next) => {
             model.minPrice = await Trim.min("price", {
                 where: {
                     model: model.id,
-                    year: model.mainTrim.year
+                    year: model.mainTrim.year,
+                    published: true
                 }
             });
 
             model.maxPrice = await Trim.max("price", {
                 where: {
                     model: model.id,
-                    year: model.mainTrim.year
+                    year: model.mainTrim.year,
+                    published: true
                 }
             });
 
@@ -1418,7 +1433,8 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
     } else {
         model.mainTrim = await Trim.findOne({
             where: {
-                model: model.id
+                model: model.id,
+                published: true
             },
             raw: true
         });
@@ -1440,7 +1456,8 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
     model.trims = await Trim.findAll({
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
         raw: true
     });
@@ -1448,7 +1465,8 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
     model.minPower = await Trim.min("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1456,7 +1474,8 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
     model.maxPower = await Trim.max("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1464,7 +1483,8 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
     model.minPower = await Trim.min("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1472,7 +1492,8 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
     model.maxPower = await Trim.max("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1480,42 +1501,48 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
     model.minTorque = await Trim.min("torque", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.maxTorque = await Trim.max("torque", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.minPrice = await Trim.min("price", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.maxPrice = await Trim.max("price", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.minfuelConsumption = await Trim.min("fuelConsumption", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.maxfuelConsumption = await Trim.max("fuelConsumption", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
@@ -1524,7 +1551,8 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
         group: ['engine'],
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     })
 
@@ -1552,7 +1580,8 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
         attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
             model: model.id,
-            slug: model.mainTrim.slug
+            slug: model.mainTrim.slug,
+            published: true
         }
     });
 
@@ -1597,7 +1626,8 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
     } else {
         model.mainTrim = await Trim.findOne({
             where: {
-                model: model.id
+                model: model.id,
+                published: true
             },
             raw: true
         });
@@ -1619,7 +1649,8 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
     model.trims = await Trim.findAll({
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
         raw: true
     });
@@ -1627,7 +1658,8 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
     model.minPower = await Trim.min("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1635,7 +1667,8 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
     model.maxPower = await Trim.max("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1643,7 +1676,8 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
     model.minPower = await Trim.min("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1651,7 +1685,8 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
     model.maxPower = await Trim.max("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1659,42 +1694,48 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
     model.minTorque = await Trim.min("torque", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.maxTorque = await Trim.max("torque", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.minPrice = await Trim.min("price", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.maxPrice = await Trim.max("price", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.minfuelConsumption = await Trim.min("fuelConsumption", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.maxfuelConsumption = await Trim.max("fuelConsumption", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
@@ -1703,7 +1744,8 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
         group: ['engine'],
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     })
 
@@ -1731,7 +1773,8 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
         attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
             model: model.id,
-            slug: model.mainTrim.slug
+            slug: model.mainTrim.slug,
+            published: true
         }
     });
 
@@ -1769,7 +1812,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
             where: {
                 slug: model.mainTrim.slug,
                 model: model.id,
-                year
+                year,
+                published: true
             },
             raw: true
         });
@@ -1778,7 +1822,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
         model.mainTrim = await Trim.findOne({
             where: {
                 model: model.id,
-                year
+                year,
+                published: true
             },
             raw: true
         });
@@ -1801,7 +1846,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
     model.trims = await Trim.findAll({
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
         raw: true
     });
@@ -1809,7 +1855,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
     model.minPower = await Trim.min("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1817,7 +1864,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
     model.maxPower = await Trim.max("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1825,7 +1873,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
     model.minPower = await Trim.min("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1833,7 +1882,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
     model.maxPower = await Trim.max("power", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
 
     });
@@ -1841,28 +1891,32 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
     model.minTorque = await Trim.min("torque", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.maxTorque = await Trim.max("torque", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.minfuelConsumption = await Trim.min("fuelConsumption", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
     model.maxfuelConsumption = await Trim.max("fuelConsumption", {
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     });
 
@@ -1871,7 +1925,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
         group: ['engine'],
         where: {
             model: model.id,
-            year: model.mainTrim.year
+            year: model.mainTrim.year,
+            published: true
         },
     })
 
@@ -1897,7 +1952,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
         attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
             model: model.id,
-            slug: model.mainTrim.slug
+            slug: model.mainTrim.slug,
+            published: true
         }
     });
 
@@ -1946,7 +2002,8 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     }
                 });
                 // if (model.mainTrim) {
@@ -1966,14 +2023,103 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
             model.minPrice = await Trim.min("price", {
                 where: {
                     model: model.id,
-                    year: model.mainTrim.year
+                    year: model.mainTrim.year,
+                    published: true
                 }
             });
 
             model.maxPrice = await Trim.max("price", {
                 where: {
                     model: model.id,
-                    year: model.mainTrim.year
+                    year: model.mainTrim.year,
+                    published: true
+                }
+            });
+
+            return model;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models: models.rows, });
+});
+
+module.exports.getPopularModelsByBrand = asyncHandler(async (req, res, next) => {
+
+    let {brand, currentModel} = req.body
+
+    let pageSize = 4;
+    let currentPage = 1;
+    let where = {
+        published: true,
+        brand,
+        id: {
+            [Op.ne] : currentModel
+        }
+    };
+
+    let conditions = {
+        where,
+        limit: pageSize,
+        offset: (currentPage - 1) * pageSize,
+        // order: orderBy,
+        raw: true
+    }
+
+    let models = { rows: [], count: 0 };
+
+    models = await Model.findAndCountAll(conditions);
+
+    models.rows = await Promise.all(
+        models.rows.map(async model => {
+            model.brand = await CarBrand.findByPk(model.brand);
+            if (model.highTrim) {
+                model.mainTrim = await Trim.findByPk(model.highTrim);
+                // model.mainTrim.images = await TrimImages.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+                // model.mainTrim.videos = await TrimVideos.findAll({
+                //     where: {
+                //         trimId: model.mainTrim.id
+                //     }
+                // })
+            } else {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id,
+                        published: true
+                    }
+                });
+                // if (model.mainTrim) {
+                //     model.mainTrim.images = await TrimImages.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                //     model.mainTrim.videos = await TrimVideos.findAll({
+                //         where: {
+                //             trimId: model.mainTrim?.id
+                //         }
+                //     })
+                // }
+
+            }
+            model.minPrice = await Trim.min("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year,
+                    published: true
+                }
+            });
+
+            model.maxPrice = await Trim.max("price", {
+                where: {
+                    model: model.id,
+                    year: model.mainTrim.year,
+                    published: true
                 }
             });
 
@@ -2007,7 +2153,8 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
                 } else {
                     v1.mainTrim = await Trim.findOne({
                         where: {
-                            model: v1.id
+                            model: v1.id,
+                            published: true
                         }
                     });
 
@@ -2015,14 +2162,16 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
                 v1.minPrice = await Trim.min("price", {
                     where: {
                         model: v1.id,
-                        year: v1.mainTrim.year
+                        year: v1.mainTrim.year,
+                        published: true
                     }
                 });
 
                 v1.maxPrice = await Trim.max("price", {
                     where: {
                         model: v1.id,
-                        year: v1.mainTrim.year
+                        year: v1.mainTrim.year,
+                        published: true
                     }
                 });
             }
@@ -2040,7 +2189,8 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
                 } else {
                     v2.mainTrim = await Trim.findOne({
                         where: {
-                            model: v2.id
+                            model: v2.id,
+                            published: true
                         }
                     });
 
@@ -2048,14 +2198,16 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
                 v2.minPrice = await Trim.min("price", {
                     where: {
                         model: v2.id,
-                        year: v2.mainTrim.year
+                        year: v2.mainTrim.year,
+                        published: true
                     }
                 });
 
                 v2.maxPrice = await Trim.max("price", {
                     where: {
                         model: v2.id,
-                        year: v2.mainTrim.year
+                        year: v2.mainTrim.year,
+                        published: true
                     }
                 });
             }

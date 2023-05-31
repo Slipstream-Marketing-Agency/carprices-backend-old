@@ -169,7 +169,8 @@ module.exports.mainSearch = asyncHandler(async (req, res, next) => {
         model.mainTrim = await Trim.findOne({
           attributes: ["id", "name", "slug", "mainSlug", "year"],
           where: {
-            model: model.id
+            model: model.id,
+            published: true
           },
           raw: true
         });

@@ -512,7 +512,8 @@ module.exports.getTrimsByModel = asyncHandler(async (req, res, next) => {
         [query.orderBy, "ASC"]
     ] : null;
     let where = {
-        model
+        model,
+        published: true
     };
     let conditions = {
         raw: true,
@@ -567,7 +568,8 @@ module.exports.getTrimsByModelMin = asyncHandler(async (req, res, next) => {
 
     const { model } = req.params;
     let where = {
-        model
+        model,
+        published: true
     };
     let conditions = {
         raw: true,
@@ -586,7 +588,8 @@ module.exports.getTrimsByModelMinAndYear = asyncHandler(async (req, res, next) =
     const { model, year } = req.params;
     let where = {
         model,
-        year
+        year,
+        published: true
     };
     let conditions = {
         raw: true,
@@ -605,7 +608,8 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
     const { trim: slug } = req.params;
 
     let where = {
-        slug
+        slug,
+        published: true
     };
 
 
@@ -636,7 +640,8 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
         attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
             model: trim.model,
-            slug: trim.slug
+            slug: trim.slug,
+            published: true
         }
     });
 
@@ -651,7 +656,8 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
     const { trim: slug } = req.params;
 
     let where = {
-        slug
+        slug,
+        published: true
     };
 
 
@@ -690,7 +696,8 @@ module.exports.getTrimsBySlugAndYear = asyncHandler(async (req, res, next) => {
 
     let where = {
         slug,
-        year
+        year,
+        published: true
     };
 
 
@@ -736,7 +743,8 @@ module.exports.getTrimsBySlugAndYearWithModel = asyncHandler(async (req, res, ne
     let where = {
         slug,
         model: modelData.id,
-        year
+        year,
+        published: true
     };
 
 
@@ -767,7 +775,8 @@ module.exports.getTrimsBySlugAndYearWithModel = asyncHandler(async (req, res, ne
         attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
             model: modelData.id,
-            slug: trim.slug
+            slug: trim.slug,
+            published: true
         }
     });
 
@@ -775,7 +784,8 @@ module.exports.getTrimsBySlugAndYearWithModel = asyncHandler(async (req, res, ne
         // attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
             model: modelData.id,
-            year: trim.year
+            year: trim.year,
+            published: true
         }
     });
 
@@ -792,7 +802,8 @@ module.exports.getTrimsYearByModel = asyncHandler(async (req, res, next) => {
         attributes: ['year'],
         group: ['year'],
         where: {
-            model: modelId
+            model: modelId,
+            published: true
         }
 
     });
@@ -808,7 +819,8 @@ module.exports.getTrimMinMaxFilterPrice = asyncHandler(async (req, res, next) =>
     const { query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (query.isLuxury) {
@@ -907,7 +919,8 @@ module.exports.getTrimMinMaxFilterPriceDynamic = asyncHandler(async (req, res, n
     const { query, body } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
 
@@ -1064,7 +1077,8 @@ module.exports.getTrimMinMaxFilterPower = asyncHandler(async (req, res, next) =>
     const { query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     const min = await Trim.min("power", {
@@ -1088,7 +1102,8 @@ module.exports.getTrimMinMaxFilterPowerDynamic = asyncHandler(async (req, res, n
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (body.price && body.price.length != 0) {
@@ -1244,7 +1259,8 @@ module.exports.getTrimMinMaxFilterTorque = asyncHandler(async (req, res, next) =
     const { query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     const min = await Trim.min("torque", {
@@ -1268,7 +1284,8 @@ module.exports.getTrimMinMaxFilterTorqueDynamic = asyncHandler(async (req, res, 
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (body.price && body.price.length != 0) {
@@ -1424,7 +1441,8 @@ module.exports.getTrimMinMaxFilterDisplacement = asyncHandler(async (req, res, n
     const { query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     const min = await Trim.min("displacement", {
@@ -1448,7 +1466,8 @@ module.exports.getTrimMinMaxFilterDisplacementDynamic = asyncHandler(async (req,
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (body.price && body.price.length != 0) {
@@ -1603,7 +1622,9 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
 
     const { query } = req;
 
-    let where = {};
+    let where = {
+        published: true
+    };
 
     if (query.isLuxury) {
         where.isLuxury = true
@@ -1713,7 +1734,8 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
     let conditions = {
         attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")), "model"]],
         where: {
-            year: { [Op.gte]: new Date().getFullYear() }
+            year: { [Op.gte]: new Date().getFullYear() },
+            published: true
         },
         raw: true
     };
@@ -1764,14 +1786,16 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
             } else {
                 let highestYear = await Trim.max("year", {
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     },
                 })
                 model.mainTrim = await Trim.findOne({
                     attributes: ["id", "price"],
                     where: {
                         model: model.id,
-                        year: highestYear
+                        year: highestYear,
+                        published: true
                     },
                     raw: true
                 });
@@ -1813,18 +1837,21 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
             trim.brand = await CarBrand.findByPk(trim.brand);
             trim.minPrice = await Trim.min("price", {
                 where: {
-                    model: trim.model
+                    model: trim.model,
+                    published: true
                 }
             })
             trim.maxPrice = await Trim.max("price", {
                 where: {
-                    model: trim.model
+                    model: trim.model,
+                    published: true
                 }
             })
             trim.allTrimsCount = await Trim.count({
                 where: {
                     model: trim.model,
                     year: trim.year,
+                    published: true
                     // id: {
                     //     [Op.ne]: trim.id
                     // }
@@ -1835,6 +1862,7 @@ module.exports.getTrimsByFilter = asyncHandler(async (req, res, next) => {
                 where: {
                     model: trim.model,
                     year: trim.year,
+                    published: true
                     // id: {
                     //     [Op.ne]: trim.id
                     // }
@@ -1892,7 +1920,8 @@ module.exports.getTrimsBodyType = asyncHandler(async (req, res, next) => {
         attributes: ['bodyType'],
         group: ['bodyType'],
         where: {
-            year: { [Op.gte]: new Date().getFullYear() }
+            year: { [Op.gte]: new Date().getFullYear() },
+            published: true
         }
     });
 
@@ -1908,7 +1937,8 @@ module.exports.getTrimsBodyTypeDynamic = asyncHandler(async (req, res, next) => 
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (body.price && body.price.length != 0) {
@@ -2062,7 +2092,8 @@ module.exports.getTrimsFuelType = asyncHandler(async (req, res, next) => {
         attributes: ['fuelType'],
         group: ['fuelType'],
         where: {
-            year: { [Op.gte]: new Date().getFullYear() }
+            year: { [Op.gte]: new Date().getFullYear() },
+            published: true
         }
     });
 
@@ -2078,7 +2109,8 @@ module.exports.getTrimsFuelTypeDynamic = asyncHandler(async (req, res, next) => 
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (body.price && body.price.length != 0) {
@@ -2232,7 +2264,8 @@ module.exports.getTrimsTransmissions = asyncHandler(async (req, res, next) => {
         attributes: ['transmission'],
         group: ['transmission'],
         where: {
-            year: { [Op.gte]: new Date().getFullYear() }
+            year: { [Op.gte]: new Date().getFullYear() },
+            published: true
         }
     });
 
@@ -2248,7 +2281,8 @@ module.exports.getTrimsTransmissionsDynamic = asyncHandler(async (req, res, next
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (body.price && body.price.length != 0) {
@@ -2402,7 +2436,8 @@ module.exports.getTrimsCylinderNo = asyncHandler(async (req, res, next) => {
         attributes: ['cylinders'],
         group: ['cylinders'],
         where: {
-            year: { [Op.gte]: new Date().getFullYear() }
+            year: { [Op.gte]: new Date().getFullYear() },
+            published: true
         }
     });
 
@@ -2418,7 +2453,8 @@ module.exports.getTrimsCylinderNoDynamic = asyncHandler(async (req, res, next) =
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (body.price && body.price.length != 0) {
@@ -2572,7 +2608,8 @@ module.exports.getTrimsDriveType = asyncHandler(async (req, res, next) => {
         attributes: ['drive'],
         group: ['drive'],
         where: {
-            year: { [Op.gte]: new Date().getFullYear() }
+            year: { [Op.gte]: new Date().getFullYear() },
+            published: true
         }
     });
 
@@ -2588,7 +2625,8 @@ module.exports.getTrimsDriveTypeDynamic = asyncHandler(async (req, res, next) =>
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (body.price && body.price.length != 0) {
@@ -2741,7 +2779,8 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (query.isLuxury) {
@@ -2974,13 +3013,15 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
                 model.lowPrice = await Trim.min("price", {
                     where: {
                         model: model.id,
-                        year: model.mainTrim.year
+                        year: model.mainTrim.year,
+                        published: true
                     }
                 })
                 model.lowTrim = await Trim.findOne({
                     attributes: ["id", "price"],
                     where: {
-                        id: model.highTrim
+                        id: model.highTrim,
+                        published: true
                     },
                     order: [["price", "ASC"]],
                     raw: true
@@ -2988,28 +3029,32 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
             } else {
                 let highestYear = await Trim.max("year", {
                     where: {
-                        model: model.id
+                        model: model.id,
+                        published: true
                     },
                 })
                 model.mainTrim = await Trim.findOne({
                     attributes: ["id", "price"],
                     where: {
                         model: model.id,
-                        year: highestYear
+                        year: highestYear,
+                        published: true
                     },
                     raw: true
                 });
                 model.lowPrice = await Trim.min("price", {
                     where: {
                         model: model.id,
-                        year: highestYear
+                        year: highestYear,
+                        published: true
                     }
                 })
                 model.lowTrim = await Trim.findOne({
                     attributes: ["id", "price"],
                     where: {
                         model: model.id,
-                        year: highestYear
+                        year: highestYear,
+                        published: true
                     },
                     order: [["price", "ASC"]],
                     raw: true
@@ -3059,18 +3104,21 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
                 where: {
                     model: trim.model,
                     year: trim.year,
+                    published: true
                 }
             })
             trim.maxPrice = await Trim.max("price", {
                 where: {
                     model: trim.model,
-                    year: trim.year
+                    year: trim.year,
+                    published: true
                 }
             })
             trim.allTrimsCount = await Trim.count({
                 where: {
                     model: trim.model,
                     year: trim.year,
+                    published: true
                     // id: {
                     //     [Op.ne]: trim.id
                     // }
@@ -3081,6 +3129,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
                 where: {
                     model: trim.model,
                     year: trim.year,
+                    published: true
                     // id: {
                     //     [Op.ne]: trim.id
                     // }
@@ -3116,7 +3165,8 @@ module.exports.getCarBrandsDynamic = asyncHandler(async (req, res, next) => {
     const { body, query } = req;
 
     let where = {
-        year: { [Op.gte]: new Date().getFullYear() }
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
     };
 
     if (query.isLuxury) {
@@ -3292,7 +3342,8 @@ module.exports.getCompareTrims = asyncHandler(async (req, res, next) => {
 
     let mainSlugs = slug.split('-vs-');
     let where = {
-        mainSlug: mainSlugs
+        mainSlug: mainSlugs,
+        published: true
     };
 
     let conditions = {
@@ -3360,7 +3411,8 @@ module.exports.changeTrimData = asyncHandler(async (req, res, next) => {
                     name: String(trimItem.trim_name),
                     model: model.id,
                     brand: brand.id,
-                    year: trimItem.year
+                    year: trimItem.year,
+                    published: true
                 }
             })
             if (trimData) {
@@ -3384,7 +3436,7 @@ module.exports.changeTrimData = asyncHandler(async (req, res, next) => {
     res
         .status(200)
         .json({ foundItems, missingItem, foundItemsCount: foundItems.length, missingItemCount: missingItem.length });
-    
+
 
 
 
