@@ -1768,6 +1768,7 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
         model.mainTrim = await Trim.findOne({
             where: {
                 slug: model.mainTrim.slug,
+                model: model.id,
                 year
             },
             raw: true
