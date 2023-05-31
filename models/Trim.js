@@ -240,6 +240,10 @@ const Trim = sequelize.define("trim", {
         allowNull: false,
         defaultValue: false
     },
+    isDiscontinued: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     publishedAt: {
         type: DataTypes.DATE
     },

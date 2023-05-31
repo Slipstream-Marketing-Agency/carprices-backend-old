@@ -433,12 +433,12 @@ module.exports.getBlogsMin = asyncHandler(async (req, res, next) => {
 
     let conditions = {
         raw: true,
-        attributes: ['id', 'title', 'slug'],
+        attributes: ['id', 'title', 'slug', 'coverImage'],
         where
     };
     if (!isAll) {
         conditions = {
-            attributes: ['id', 'title', 'slug'],
+            attributes: ['id', 'title', 'slug', 'coverImage'],
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,

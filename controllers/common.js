@@ -14,6 +14,7 @@ const sequelize = require("../util/database");
 const Model = require("../models/Model");
 const ContactForm = require("../models/ContactForm");
 const Trim = require("../models/Trim");
+const Newsletter = require("../models/Newsletter");
 
 const includeOptions = [
   // {
@@ -214,6 +215,29 @@ module.exports.contactFormSubmit = asyncHandler(async (req, res, next) => {
   });
 
   res.status(201).json({ message: "Contact form submitted" });
+});
+
+module.exports.subscriptionFormSubmit = asyncHandler(async (req, res, next) => {
+  const {
+    email
+  } = req.body.subscription;
+
+  let oldData = await Newsletter.findOne({
+    where: {
+      email
+    }
+  })
+
+  if (oldData) {
+    res.status(403).json({ message: "Newsletter Already Subscribed" });
+    return
+  }
+
+  await Newsletter.create({
+    email,
+  });
+
+  res.status(201).json({ message: "Newsletter Subscribed" });
 });
 
 const fieldValidation = (field, next) => {

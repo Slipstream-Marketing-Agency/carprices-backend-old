@@ -86,6 +86,7 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
         doors,
         wheels,
         published,
+        isDiscontinued,
         images,
         videos
     } = req.body.trim;
@@ -181,6 +182,7 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
         isElectric,
         euroNcap,
         published,
+        isDiscontinued,
         slug,
         mainSlug,
         power,
@@ -374,6 +376,7 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
         slug,
         mainSlug,
         published,
+        isDiscontinued,
         images,
         videos
     } = req.body.trim;
@@ -450,6 +453,7 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
         isElectric,
         euroNcap,
         published,
+        isDiscontinued,
         power,
         gearBox,
         haveRearParkAssist,
