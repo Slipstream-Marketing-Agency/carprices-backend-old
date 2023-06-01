@@ -21,7 +21,6 @@ const Trim = sequelize.define("trim", {
     },
     oldPath: {
         type: DataTypes.STRING,
-        allowNull: false,
         unique: true
     },
     description: {
