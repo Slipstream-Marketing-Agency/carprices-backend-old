@@ -11,6 +11,7 @@ const Model = require("../models/Model");
 const TrimImages = require("../models/TrimImages");
 const Trim = require("../models/Trim");
 const TrimVideos = require("../models/TrimVideo");
+const aws = require("../util/aws");
 
 module.exports.createTrim = asyncHandler(async (req, res, next) => {
     const {
@@ -3438,8 +3439,97 @@ module.exports.changeTrimData = asyncHandler(async (req, res, next) => {
         .json({ foundItems, missingItem, foundItemsCount: foundItems.length, missingItemCount: missingItem.length });
 
 
+});
+
+module.exports.changeTrimImageURL = asyncHandler(async (req, res, next) => {
+
+    // const trimItems = req.body;
+
+    let trims = await Trim.findAll({
+    })
+
+    await Promise.all(
+        trims.map(async trim => {
+            if (trim.featuredImage == null) {
+                return;
+            }
+            // let model = await Model.findByPk(trim.model)
+            let newURL = `img/car/${trim.mainSlug}.${trim.featuredImage.split('.')[1]}`
+            try {
+                aws.renameObj(trim.featuredImage, newURL)
+            } catch (error) {
+                console.log('err', error);
+            }
+            await Trim.update({
+                featuredImage: newURL
+            }, {
+                where: {
+                    id: trim.id
+                }
+            })
+            // 
+        })
+    )
 
 
+
+    res
+        .status(200)
+        .json({});
+
+
+});
+
+module.exports.changeTrimGalleryImageURL = asyncHandler(async (req, res, next) => {
+
+    // const trimItems = req.body;
+
+    let trims = await Trim.findAll({
+        where: {
+            id: {
+                [Op.ne]: 1
+            }
+        }
+    })
+
+    await Promise.all(
+        trims.map(async trim => {
+            let galleryImages = await TrimImages.findAll({
+                where: {
+                    trimId: trim.id
+                },
+                raw: true
+            })
+            galleryImages.map(async (image, index) => {
+                // console.log("iiii ", image, index);
+                let newURL = `img/car/gallery/${trim.mainSlug}-${index + 1}.${image.image.split('.')[1]}`
+                // console.log('nnnn ', newURL);
+                try {
+                    aws.renameObj(image.image, newURL)
+                } catch (error) {
+                    console.log('err', error);
+                }
+                await TrimImages.update({
+                    image: newURL
+                }, {
+                    where: {
+                        id: image.id
+                    }
+                })
+                
+            })
+
+            // console.log("galleryImages ", galleryImages);
+            // // let model = await Model.findByPk(trim.model)
+
+        })
+    )
+
+
+
+    res
+        .status(200)
+        .json({});
 
 
 });

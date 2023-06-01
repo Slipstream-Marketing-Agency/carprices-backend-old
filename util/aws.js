@@ -45,4 +45,25 @@ module.exports = {
       },
     }),
   }),
+  renameObj: (oldKey, newKey) => {
+    console.log("oldKey, newKey ", oldKey, newKey);
+    console.log("process.env.AWS_S3_BUCKET_NAME ", process.env.AWS_S3_BUCKET_NAME);
+    s3.copyObject({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      CopySource: `/${process.env.AWS_S3_BUCKET_NAME}/${oldKey}`,
+      Key: newKey
+    })
+      .promise()
+      .then(() => {
+        // Delete the old object
+        s3.deleteObject({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: oldKey
+        }).promise()
+      }
+
+      )
+      // Error handling is left up to reader
+      .catch((e) => console.error(e))
+  }
 };
