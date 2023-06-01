@@ -456,6 +456,48 @@ module.exports.getBlogsMin = asyncHandler(async (req, res, next) => {
         .json({ blogs: blogs.rows, blogsCount: blogs.count, totalPage: Math.ceil(blogs.count / pageSize) });
 });
 
+module.exports.getBlogsTag = asyncHandler(async (req, res, next) => {
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let type = query.type ?? "news";
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ]: [];
+    let where = {
+        
+    };
+    if (query.search) {
+        where.title = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let tags = { rows: [], count: 0 };
+
+    tags = await Tag.findAndCountAll(conditions);
+
+    res
+        .status(200)
+        .json({ tags: tags.rows, tagsCount: tags.count, totalPage: Math.ceil(tags.count / pageSize) });
+});
+
 module.exports.getBlogsByModel = asyncHandler(async (req, res, next) => {
 
     const { model } = req.params;
