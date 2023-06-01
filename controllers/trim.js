@@ -3516,7 +3516,7 @@ module.exports.changeTrimGalleryImageURL = asyncHandler(async (req, res, next) =
                         id: image.id
                     }
                 })
-                
+
             })
 
             // console.log("galleryImages ", galleryImages);
@@ -3525,11 +3525,37 @@ module.exports.changeTrimGalleryImageURL = asyncHandler(async (req, res, next) =
         })
     )
 
-
-
     res
         .status(200)
         .json({});
+
+
+});
+
+module.exports.handleOldURLRedirect = asyncHandler(async (req, res, next) => {
+
+    const { oldPath } = req.body;
+
+    let trim = await Trim.findOne({
+        where: {
+            oldPath
+        }
+    })
+
+    if (!trim) {
+        res
+            .status(404)
+            .json({message: "Trim not found"});
+    }
+
+    trim.brand = await CarBrand.findByPk(trim.brand);
+    trim.model = await Model.findByPk(trim.model, {
+        // attributes: ["id", "name"]
+    });
+
+    res
+        .status(200)
+        .json({trim});
 
 
 });
