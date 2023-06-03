@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middlewares/auth");
-const { getModels, getFeaturedModels, getElectricFeaturedModels, getModelsByBrand, getModelsByBrandAndYear, getModelsByBrandSlug, getModelsByBrandAndYearSlug, getModelsByBrandMin, getModelsBySlug, searchModels, topMostSearchedCars, compareCarModels, getSpecificModels, getModelsBySlugAndYear, getModelsBySlugBrandAndYear, getModelsBySlugBrand, getPopularModelsByBrand } = require("../controllers/model");
+const { getModels, getFeaturedModels, getElectricFeaturedModels, getModelsByBrand, getModelsByBrandAndYear, getModelsByBrandSlug, getModelsByBrandAndYearSlug, getModelsByBrandMin, getModelsBySlug, searchModels, topMostSearchedCars, compareCarModels, getSpecificModels, getModelsBySlugAndYear, getModelsBySlugBrandAndYear, getModelsBySlugBrand, getPopularModelsByBrand, handleOldModelURLRedirect } = require("../controllers/model");
 
 router.route("/").get(getModels);
 router.route("/search").get(searchModels);
@@ -18,6 +18,7 @@ router.route("/featured/electric").get(getElectricFeaturedModels);
 router.route("/:model").get(getModelsBySlug);
 router.route("/:brand/:model").get(getModelsBySlugBrand);
 router.route("/:brand/:model/:year").get(getModelsBySlugBrandAndYear);
+router.route("/redirect").post(handleOldModelURLRedirect)
 
 router.route("/specific").post(getSpecificModels);
 

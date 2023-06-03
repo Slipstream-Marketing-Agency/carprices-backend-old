@@ -1806,7 +1806,7 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
     model.brand = await CarBrand.findByPk(model.brand);
 
     if (model.highTrim) {
-        model.mainTrim = await Trim.findByPk(model.highTrim, {raw: true});
+        model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
         console.log("model.mainTrim ", model.mainTrim);
         model.mainTrim = await Trim.findOne({
             where: {
@@ -2047,7 +2047,7 @@ module.exports.topMostSearchedCars = asyncHandler(async (req, res, next) => {
 
 module.exports.getPopularModelsByBrand = asyncHandler(async (req, res, next) => {
 
-    let {brand, currentModel} = req.body
+    let { brand, currentModel } = req.body
 
     let pageSize = 4;
     let currentPage = 1;
@@ -2055,7 +2055,7 @@ module.exports.getPopularModelsByBrand = asyncHandler(async (req, res, next) => 
         published: true,
         brand,
         id: {
-            [Op.ne] : currentModel
+            [Op.ne]: currentModel
         }
     };
 
@@ -2220,6 +2220,37 @@ module.exports.compareCarModels = asyncHandler(async (req, res, next) => {
     res
         .status(200)
         .json({ models: models, });
+});
+
+module.exports.handleOldModelURLRedirect = asyncHandler(async (req, res, next) => {
+
+    const { oldPath } = req.body;
+
+    let trim = await Trim.findOne({
+        where: {
+            oldPath: {
+                [Op.iLike]: '%' + oldPath + '%'
+            }
+        }
+    })
+
+    if (!trim) {
+        res
+            .status(404)
+            .json({ message: "Trim not found" });
+        return
+    }
+
+    trim.brand = await CarBrand.findByPk(trim.brand);
+    trim.model = await Model.findByPk(trim.model, {
+        // attributes: ["id", "name"]
+    });
+
+    res
+        .status(200)
+        .json({ trim });
+
+
 });
 
 const fieldValidation = (field, next) => {

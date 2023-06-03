@@ -3546,6 +3546,7 @@ module.exports.handleOldURLRedirect = asyncHandler(async (req, res, next) => {
         res
             .status(404)
             .json({message: "Trim not found"});
+        return
     }
 
     trim.brand = await CarBrand.findByPk(trim.brand);
