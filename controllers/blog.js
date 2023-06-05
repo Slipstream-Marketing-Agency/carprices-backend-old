@@ -93,7 +93,7 @@ module.exports.createBlog = asyncHandler(async (req, res, next) => {
             coverImage,
             content,
             type,
-            author: req.loggedAdmin.id //authorId// 
+            author: 2 //req.loggedAdmin.id //authorId// 
         })
 
         let blogBrands = brands.map(brand => ({ blogId: blog.id, brandId: brand }));
@@ -126,6 +126,160 @@ module.exports.createBlog = asyncHandler(async (req, res, next) => {
         )
 
 
+        await BlogBrand.bulkCreate(blogBrands);
+        await BlogCategory.bulkCreate(blogCategories);
+        await BlogModel.bulkCreate(blogModels);
+        await BlogTag.bulkCreate(blogTags);
+
+        await redisClient.del("blogs");
+
+        return res.status(201).json({ blog });
+    } catch (error) {
+        console.log('Error', error.message);
+        // new ErrorResponse(err.message);
+        return res.status(403).json({ message: error.message })
+    }
+
+
+
+
+});
+
+module.exports.updateBlog = asyncHandler(async (req, res, next) => {
+    let {id} = req.params;
+    let {
+        title,
+        metaTitle,
+        summary,
+        content,
+        coverImage,
+        published,
+        brands,
+        categories,
+        models,
+        tags,
+        type,
+        slug,
+        publishedAt,
+        // authorFirst,
+        // authorLast
+    } = req.body.blog;
+
+    fieldValidation(title, next);
+    fieldValidation(coverImage, next);
+    fieldValidation(content, next);
+    fieldValidation(published, next);
+
+    // if (!slug) {
+    //     slug = slugify(title, {
+    //         lower: true
+    //     });
+    // }
+
+
+    // let publishedAt = null
+
+    if (published) {
+        publishedAt = new Date()
+    } else {
+        publishedAt = null
+    }
+
+    // console.log(publishedAt);
+
+    // Admin.findOrCreate({
+    //     email: authorFirst + "@carprices.ae",
+    // }, {
+    //     email: authorFirst + "@carprices.ae",
+    //     password: "Test123",
+    //     username: authorFirst,
+    //     firstName: authorFirst,
+    //     lastName: authorLast
+    // });
+
+    // const [row, created] = await Admin.findOrCreate({
+    //     where: {
+    //         email: authorFirst + "@carprices.ae",
+    //     },
+    //     defaults: {
+    //         email: authorFirst + "@carprices.ae",
+    //         password: "Test123",
+    //         username: authorFirst,
+    //         firstName: authorFirst,
+    //         lastName: authorLast
+    //     }
+    // });
+
+    // let authorId = row.id
+
+    try {
+        const blog = await Blog.update({
+            title,
+            metaTitle,
+            slug,
+            summary,
+            published,
+            publishedAt,
+            coverImage,
+            content,
+            type,
+            author: req.loggedAdmin.id //authorId// 
+        }, {
+            where: {
+                id
+            }
+        })
+
+        let blogBrands = brands.map(brand => ({ blogId: id, brandId: brand }));
+        let blogCategories = categories.map(category => ({ blogId: id, categoryId: category }));
+        let blogModels = models.map(model => ({ blogId: id, modelId: model }));
+        let blogTags = [];
+
+        await Promise.all(
+            tags.map(async tag => {
+                let tagSlug = slugify(tag, {
+                    lower: true
+                });
+
+                const [row, created] = await Tag.findOrCreate({
+                    where: {
+                        title: tag
+                    },
+                    defaults: {
+                        title: tag,
+                        slug: tagSlug
+                    }
+                });
+
+                blogTags.push({
+                    blogId: id,
+                    tagId: row.id
+                })
+                return tag;
+            })
+        )
+
+        await BlogBrand.destroy({
+            where: {
+                blogId: id
+            }
+        })
+        await BlogCategory.destroy({
+            where: {
+                blogId: id
+            }
+        })
+        await BlogModel.destroy({
+            where: {
+                blogId: id
+            }
+        })
+        await BlogTag.destroy({
+            where: {
+                blogId: id
+            }
+        })
+        console.log("blogTags ", blogTags);
         await BlogBrand.bulkCreate(blogBrands);
         await BlogCategory.bulkCreate(blogCategories);
         await BlogModel.bulkCreate(blogModels);
@@ -247,7 +401,7 @@ module.exports.getAdminBlogById = asyncHandler(async (req, res, next) => {
 
     const { id } = req.params;
 
-    let blog = await Blog.findByPk(id);
+    let blog = await Blog.findByPk(id, {raw: true});
 
     blog.brands = await BlogBrand.findAll({
         where: {
@@ -291,6 +445,7 @@ module.exports.getAdminBlogById = asyncHandler(async (req, res, next) => {
         },
         raw: true
     });
+    console.log("blog.tags ", blog.tags);
     blog.tags = await Promise.all(
         blog.tags.map(async tag => {
             tag = await Tag.findByPk(tag.tagId);

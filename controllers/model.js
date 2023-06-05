@@ -109,18 +109,18 @@ module.exports.getAdminModels = asyncHandler(async (req, res, next) => {
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
             // for changing the year
-            model.highestYear = await Trim.max('year', {
-                where: {
-                    model: model.id
-                }
-            })
-            await Model.update({
-                year: model.highestYear || 2023
-            }, {
-                where: {
-                    id: model.id
-                }
-            })
+            // model.highestYear = await Trim.max('year', {
+            //     where: {
+            //         model: model.id
+            //     }
+            // })
+            // await Model.update({
+            //     year: model.highestYear || 2023
+            // }, {
+            //     where: {
+            //         id: model.id
+            //     }
+            // })
             // end of changing year
             return model;
         })
