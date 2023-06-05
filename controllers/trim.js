@@ -3538,7 +3538,9 @@ module.exports.handleOldURLRedirect = asyncHandler(async (req, res, next) => {
 
     let trim = await Trim.findOne({
         where: {
-            oldPath
+            oldPath: {
+                [Op.iLike]: '%' + oldPath + '%'
+            }
         }
     })
 
