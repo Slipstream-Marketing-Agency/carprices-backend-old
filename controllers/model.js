@@ -12,6 +12,7 @@ const Trim = require("../models/Trim");
 const TrimVideos = require("../models/TrimVideo");
 const TrimImages = require("../models/TrimImages");
 const HomeListing = require("../models/HomeListing");
+const OldModelSlug = require("../models/OldModelSlug");
 
 module.exports.createModel = asyncHandler(async (req, res, next) => {
     const {
@@ -1576,8 +1577,6 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
         })
     )
 
-
-
     model.allYearMainTrims = await Trim.findAll({
         attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
@@ -2331,6 +2330,54 @@ module.exports.handleOldModelURLRedirect = asyncHandler(async (req, res, next) =
         .json({ trim });
 
 
+});
+
+module.exports.getOldSlugModel = asyncHandler(async (req, res, next) => {
+
+    const { slug } = req.params;
+
+    const findModel = await OldModelSlug.findOne({
+        where: {
+            oldSlug: slug
+        }
+    })
+
+    if (!findModel) {
+        return res.status(404).json({
+            message: "Model not found"
+        })
+    }
+
+    const model = await Model.findByPk(findModel.model, { raw: true });
+
+    res
+        .status(200)
+        .json({ model });
+});
+
+
+
+module.exports.addOldModelSlug = asyncHandler(async (req, res, next) => {
+
+    const { models } = req.body;
+
+    await Promise.all(
+        models.map(async model => {
+            let modelData = await Model.findOne({
+                where: {
+                    slug: String(model.Slug)
+                }
+            })
+            await OldModelSlug.create({
+                model: modelData.id,
+                oldSlug: model.Urls.split('/')[model.Urls.split('/').length - 1]
+            })
+        })
+    )
+
+    res
+        .status(200)
+        .json({ message: 'Done' });
 });
 
 module.exports.setAdminHomeListings = asyncHandler(async (req, res, next) => {

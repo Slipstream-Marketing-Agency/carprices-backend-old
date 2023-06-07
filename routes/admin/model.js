@@ -1,5 +1,5 @@
 const express = require("express");
-const { getAdminModels, createModel, updateModel, setHighTrim, setFeaturedModels, removeFeaturedModels, getAdminFeaturedModels, getAdminElectricFeaturedModels, setElectricFeaturedModels, removeElectricFeaturedModels, getAdminModelById, getAdminModelByBrand, setAdminHomeListings, getAdminHomeListingsByType, getAdminHomeListings, getAdminHomeListingsById } = require("../../controllers/model");
+const { getAdminModels, createModel, updateModel, setHighTrim, setFeaturedModels, removeFeaturedModels, getAdminFeaturedModels, getAdminElectricFeaturedModels, setElectricFeaturedModels, removeElectricFeaturedModels, getAdminModelById, getAdminModelByBrand, setAdminHomeListings, getAdminHomeListingsByType, getAdminHomeListings, getAdminHomeListingsById, addOldModelSlug } = require("../../controllers/model");
 const router = express.Router();
 const { protect } = require("../../middlewares/auth");
 
@@ -14,6 +14,8 @@ router.route("/featured/remove").post(protect, removeFeaturedModels)
 router.route("/electric/featured").get(protect, getAdminElectricFeaturedModels).post(protect, setElectricFeaturedModels)
 router.route("/electric/featured/remove").post(protect, removeElectricFeaturedModels)
 router.route("/by-brand/:brand").get(protect, getAdminModelByBrand)
+router.route("/old-slug").post(protect, addOldModelSlug)
 router.route("/:model").get(protect, getAdminModelById).post(protect, updateModel);
+
 
 module.exports = router;
