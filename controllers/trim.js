@@ -643,8 +643,34 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
             model: trim.model,
             slug: trim.slug,
             published: true
-        }
+        },
+        raw: true
     });
+
+    let possibleYears = [2023, 2022, 2021, 2020]
+    let trimYears = trim.allYearMainTrims.map(item => item.year)
+    
+    await Promise.all(
+        possibleYears.map(async year => {
+            if (!trimYears.find(val => val == year)) {
+                let yearTrim = await Trim.findOne({
+                    attributes: ["id", "name", "year", "featuredImage", "slug"],
+                    where: {
+                        model: trim.model.id,
+                        year,
+                        published: true
+                    },
+                    raw: true
+                });
+                if (yearTrim) {
+                    trim.allYearMainTrims.push(yearTrim)
+                }
+            }
+
+        })
+    )
+
+    trim.allYearMainTrims = _.sortBy(trim.allYearMainTrims, 'year' , 'desc')
 
 
     res
@@ -775,11 +801,37 @@ module.exports.getTrimsBySlugAndYearWithModel = asyncHandler(async (req, res, ne
     trim.allYearMainTrims = await Trim.findAll({
         attributes: ["id", "name", "year", "featuredImage", "slug"],
         where: {
-            model: modelData.id,
+            model: trim.model.id,
             slug: trim.slug,
             published: true
-        }
+        },
+        raw: true
     });
+
+    let possibleYears = [2023, 2022, 2021, 2020]
+    let trimYears = trim.allYearMainTrims.map(item => item.year)
+    
+    await Promise.all(
+        possibleYears.map(async year => {
+            if (!trimYears.find(val => val == year)) {
+                let yearTrim = await Trim.findOne({
+                    attributes: ["id", "name", "year", "featuredImage", "slug"],
+                    where: {
+                        model: trim.model.id,
+                        year,
+                        published: true
+                    },
+                    raw: true
+                });
+                if (yearTrim) {
+                    trim.allYearMainTrims.push(yearTrim)
+                }
+            }
+
+        })
+    )
+
+    trim.allYearMainTrims = _.sortBy(trim.allYearMainTrims, 'year' , 'desc')
 
     trim.allTrims = await Trim.findAll({
         // attributes: ["id", "name", "year", "featuredImage", "slug"],

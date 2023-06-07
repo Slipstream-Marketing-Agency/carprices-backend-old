@@ -2,6 +2,7 @@ const { where, Op } = require("sequelize");
 const asyncHandler = require("../middlewares/asyncHandler");
 const ErrorResponse = require("../util/errorResponse");
 const slugify = require("slugify");
+const _ = require("lodash");
 
 const redisClient = require("../util/caching");
 const CarBrand = require("../models/CarBrand");
@@ -1583,8 +1584,34 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
             model: model.id,
             slug: model.mainTrim.slug,
             published: true
-        }
+        },
+        raw: true
     });
+
+    let possibleYears = [2023, 2022, 2021, 2020]
+    let trimYears = model.allYearMainTrims.map(item => item.year)
+    
+    await Promise.all(
+        possibleYears.map(async year => {
+            if (!trimYears.find(val => val == year)) {
+                let yearTrim = await Trim.findOne({
+                    attributes: ["id", "name", "year", "featuredImage", "slug"],
+                    where: {
+                        model: model.id,
+                        year,
+                        published: true
+                    },
+                    raw: true
+                });
+                if (yearTrim) {
+                    model.allYearMainTrims.push(yearTrim)
+                }
+            }
+
+        })
+    )
+
+    model.allYearMainTrims = _.sortBy(model.allYearMainTrims, 'year' , 'desc')
 
 
     res
@@ -1776,8 +1803,34 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
             model: model.id,
             slug: model.mainTrim.slug,
             published: true
-        }
+        },
+        raw: true
     });
+
+    let possibleYears = [2023, 2022, 2021, 2020]
+    let trimYears = model.allYearMainTrims.map(item => item.year)
+    
+    await Promise.all(
+        possibleYears.map(async year => {
+            if (!trimYears.find(val => val == year)) {
+                let yearTrim = await Trim.findOne({
+                    attributes: ["id", "name", "year", "featuredImage", "slug"],
+                    where: {
+                        model: model.id,
+                        year,
+                        published: true
+                    },
+                    raw: true
+                });
+                if (yearTrim) {
+                    model.allYearMainTrims.push(yearTrim)
+                }
+            }
+
+        })
+    )
+
+    model.allYearMainTrims = _.sortBy(model.allYearMainTrims, 'year' , 'desc')
 
 
     res
@@ -1819,7 +1872,8 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
             raw: true
         });
         console.log("model.mainTrim ", model.mainTrim);
-    } else {
+    }
+    if (!model.highTrim || model.mainTrim == null) {
         model.mainTrim = await Trim.findOne({
             where: {
                 model: model.id,
@@ -1955,9 +2009,34 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
             model: model.id,
             slug: model.mainTrim.slug,
             published: true
-        }
+        },
+        raw: true
     });
 
+    let possibleYears = [2023, 2022, 2021, 2020]
+    let trimYears = model.allYearMainTrims.map(item => item.year)
+
+    await Promise.all(
+        possibleYears.map(async year => {
+            if (!trimYears.find(val => val == year)) {
+                let yearTrim = await Trim.findOne({
+                    attributes: ["id", "name", "year", "featuredImage", "slug"],
+                    where: {
+                        model: model.id,
+                        year,
+                        published: true
+                    },
+                    raw: true
+                });
+                if (yearTrim) {
+                    model.allYearMainTrims.push(yearTrim)
+                }
+            }
+
+        })
+    )
+
+    model.allYearMainTrims = _.sortBy(model.allYearMainTrims, 'year' , 'desc')
 
     res
         .status(200)
