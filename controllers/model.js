@@ -1907,7 +1907,7 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
         raw: true
     });
 
-    model.minPower = await Trim.min("power", {
+    model.minPrice = await Trim.min("price", {
         where: {
             model: model.id,
             year: model.mainTrim.year,
@@ -1916,7 +1916,7 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
 
     });
 
-    model.maxPower = await Trim.max("power", {
+    model.maxPrice = await Trim.max("price", {
         where: {
             model: model.id,
             year: model.mainTrim.year,
