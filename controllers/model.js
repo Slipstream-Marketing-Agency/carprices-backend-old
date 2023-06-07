@@ -10,6 +10,7 @@ const Model = require("../models/Model");
 const Trim = require("../models/Trim");
 const TrimVideos = require("../models/TrimVideo");
 const TrimImages = require("../models/TrimImages");
+const HomeListing = require("../models/HomeListing");
 
 module.exports.createModel = asyncHandler(async (req, res, next) => {
     const {
@@ -2250,6 +2251,134 @@ module.exports.handleOldModelURLRedirect = asyncHandler(async (req, res, next) =
         .status(200)
         .json({ trim });
 
+
+});
+
+module.exports.setAdminHomeListings = asyncHandler(async (req, res, next) => {
+
+    const { orderNumber, modelId, brandId, type } = req.body;
+
+    console.log("bbb ", req.body);
+
+    let homeListingItem = await HomeListing.findOne({
+        where: {
+            type,
+            orderNumber
+        }
+    })
+
+    if (homeListingItem) {
+        await HomeListing.update({
+            modelId, brandId
+        }, {
+            where: {
+                type,
+                orderNumber
+            }
+        }).catch(e => {
+            console.log("Error ", e);
+        })
+        return res
+            .status(200)
+            .json({ message: "List Updated" });
+    } else {
+        await HomeListing.create({
+            modelId,
+            brandId,
+            type,
+            orderNumber
+        })
+        return res
+            .status(200)
+            .json({ message: "List Created" });
+    }
+
+});
+
+module.exports.getAdminHomeListings = asyncHandler(async (req, res, next) => {
+
+    const { type } = req.params;
+
+    let homeListings = await HomeListing.findAll({
+    })
+
+    return res
+        .status(200)
+        .json({ homeListings });
+
+});
+
+module.exports.getAdminHomeListingsByType = asyncHandler(async (req, res, next) => {
+
+    const { type } = req.params;
+
+    let homeListings = await HomeListing.findAll({
+        where: {
+            type
+        },
+        order: [['orderNumber', 'ASC']],
+        raw: true
+    })
+
+    homeListings = await Promise.all(
+        homeListings.map(async item => {
+            console.log('iiii ',);
+            item.model = await Model.findByPk(item.modelId, { raw: true })
+            item.model.brand = await CarBrand.findByPk(item.model.brand)
+            if (item.model.highTrim) {
+                item.model.mainTrim = await Trim.findByPk(item.model.highTrim);
+            } else {
+                item.model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: item.model.id,
+                        published: true
+                    }
+                });
+            }
+            return item
+        })
+    )
+
+    return res
+        .status(200)
+        .json({ homeListings });
+
+});
+
+module.exports.getAdminHomeListingsById = asyncHandler(async (req, res, next) => {
+
+    const { id } = req.params;
+
+    let homeListing = await HomeListing.findOne({
+        where: {
+            id
+        },
+        order: [['orderNumber', 'ASC']],
+        raw: true
+    })
+
+    // homeListings = await Promise.all(
+    //     homeListings.map(async item => {
+    //         console.log('iiii ',);
+    homeListing.model = await Model.findByPk(homeListing.modelId, { raw: true })
+    homeListing.model.brand = await CarBrand.findByPk(homeListing.model.brand)
+    if (homeListing.model.highTrim) {
+        homeListing.model.mainTrim = await Trim.findByPk(homeListing.model.highTrim);
+    } else {
+        homeListing.model.mainTrim = await Trim.findOne({
+            where: {
+                model: homeListing.model.id,
+                published: true
+            }
+        });
+    }
+    //         return item
+    //     })
+    // )
+
+    return res
+        .status(200)
+        .json({ homeListing });
 
 });
 
