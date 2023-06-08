@@ -88,6 +88,7 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
         wheels,
         published,
         isDiscontinued,
+        rearBrakes,
         images,
         videos
     } = req.body.trim;
@@ -192,6 +193,7 @@ module.exports.createTrim = asyncHandler(async (req, res, next) => {
         airbags,
         doors,
         wheels,
+        rearBrakes
     });
 
     const trimImages = images.map((image) => ({
@@ -378,6 +380,7 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
         mainSlug,
         published,
         isDiscontinued,
+        rearBrakes,
         images,
         videos
     } = req.body.trim;
@@ -463,6 +466,7 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
         wheels,
         slug,
         mainSlug,
+        rearBrakes
     }, {
         where: {
             id: trim
