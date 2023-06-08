@@ -1589,7 +1589,7 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
 
     let possibleYears = [2023, 2022, 2021, 2020]
     let trimYears = model.allYearMainTrims.map(item => item.year)
-    
+
     await Promise.all(
         possibleYears.map(async year => {
             if (!trimYears.find(val => val == year)) {
@@ -1610,7 +1610,7 @@ module.exports.getModelsBySlug = asyncHandler(async (req, res, next) => {
         })
     )
 
-    model.allYearMainTrims = _.sortBy(model.allYearMainTrims, 'year' , 'desc')
+    model.allYearMainTrims = _.sortBy(model.allYearMainTrims, 'year', 'desc')
 
 
     res
@@ -1808,7 +1808,7 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
 
     let possibleYears = [2023, 2022, 2021, 2020]
     let trimYears = model.allYearMainTrims.map(item => item.year)
-    
+
     await Promise.all(
         possibleYears.map(async year => {
             if (!trimYears.find(val => val == year)) {
@@ -1829,7 +1829,7 @@ module.exports.getModelsBySlugBrand = asyncHandler(async (req, res, next) => {
         })
     )
 
-    model.allYearMainTrims = _.sortBy(model.allYearMainTrims, 'year' , 'desc')
+    model.allYearMainTrims = _.sortBy(model.allYearMainTrims, 'year', 'desc')
 
 
     res
@@ -2035,7 +2035,7 @@ module.exports.getModelsBySlugBrandAndYear = asyncHandler(async (req, res, next)
         })
     )
 
-    model.allYearMainTrims = _.sortBy(model.allYearMainTrims, 'year' , 'desc')
+    model.allYearMainTrims = _.sortBy(model.allYearMainTrims, 'year', 'desc')
 
     res
         .status(200)
@@ -2382,7 +2382,7 @@ module.exports.addOldModelSlug = asyncHandler(async (req, res, next) => {
 
 module.exports.setAdminHomeListings = asyncHandler(async (req, res, next) => {
 
-    const { orderNumber, modelId, brandId, type } = req.body;
+    const { orderNumber, modelId, modelId2, brandId, type } = req.body;
 
     console.log("bbb ", req.body);
 
@@ -2395,7 +2395,7 @@ module.exports.setAdminHomeListings = asyncHandler(async (req, res, next) => {
 
     if (homeListingItem) {
         await HomeListing.update({
-            modelId, brandId
+            modelId, brandId, modelId2
         }, {
             where: {
                 type,
@@ -2410,6 +2410,7 @@ module.exports.setAdminHomeListings = asyncHandler(async (req, res, next) => {
     } else {
         await HomeListing.create({
             modelId,
+            modelId2,
             brandId,
             type,
             orderNumber
@@ -2450,6 +2451,10 @@ module.exports.getAdminHomeListingsByType = asyncHandler(async (req, res, next) 
         homeListings.map(async item => {
             console.log('iiii ',);
             item.model = await Model.findByPk(item.modelId, { raw: true })
+            if (!item.model) {
+                item.brand = await CarBrand.findByPk(item.brandId)
+                return item
+            }
             item.model.brand = await CarBrand.findByPk(item.model.brand)
             if (item.model.highTrim) {
                 item.model.mainTrim = await Trim.findByPk(item.model.highTrim);
@@ -2460,6 +2465,20 @@ module.exports.getAdminHomeListingsByType = asyncHandler(async (req, res, next) 
                         published: true
                     }
                 });
+            }
+            if (item.modelId2) {
+                item.model2 = await Model.findByPk(item.modelId2, { raw: true })
+                item.model2.brand = await CarBrand.findByPk(item.model2.brand)
+                if (item.model2.highTrim) {
+                    item.model2.mainTrim = await Trim.findByPk(item.model2.highTrim);
+                } else {
+                    item.model2.mainTrim = await Trim.findOne({
+                        where: {
+                            model: item.model2.id,
+                            published: true
+                        }
+                    });
+                }
             }
             return item
         })
@@ -2487,6 +2506,12 @@ module.exports.getAdminHomeListingsById = asyncHandler(async (req, res, next) =>
     //     homeListings.map(async item => {
     //         console.log('iiii ',);
     homeListing.model = await Model.findByPk(homeListing.modelId, { raw: true })
+    if (!homeListing.model) {
+        homeListing.brand = await CarBrand.findByPk(homeListing.brandId)
+        return res
+            .status(200)
+            .json({ homeListing });
+    }
     homeListing.model.brand = await CarBrand.findByPk(homeListing.model.brand)
     if (homeListing.model.highTrim) {
         homeListing.model.mainTrim = await Trim.findByPk(homeListing.model.highTrim);
@@ -2497,6 +2522,20 @@ module.exports.getAdminHomeListingsById = asyncHandler(async (req, res, next) =>
                 published: true
             }
         });
+    }
+    if (homeListing.modelId2) {
+        homeListing.model2 = await Model.findByPk(homeListing.modelId2, { raw: true })
+        homeListing.model2.brand = await CarBrand.findByPk(homeListing.model2.brand)
+        if (homeListing.model2.highTrim) {
+            homeListing.model2.mainTrim = await Trim.findByPk(homeListing.model2.highTrim);
+        } else {
+            homeListing.model2.mainTrim = await Trim.findOne({
+                where: {
+                    model: homeListing.model2.id,
+                    published: true
+                }
+            });
+        }
     }
     //         return item
     //     })

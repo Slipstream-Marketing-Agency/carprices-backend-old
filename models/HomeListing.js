@@ -9,12 +9,15 @@ const HomeListing = sequelize.define("home_listing", {
     modelId: {
         type: DataTypes.INTEGER
     },
+    modelId2: {
+        type: DataTypes.INTEGER
+    },
     brandId: {
         type: DataTypes.INTEGER
     },
     type: {
         type: DataTypes.ENUM,
-        values: ['popular', 'featured', 'electricFeatured', 'compareCar']
+        values: ['popular', 'featured', 'electricFeatured', 'compareCar', 'popularBrand']
     }
 });
 
