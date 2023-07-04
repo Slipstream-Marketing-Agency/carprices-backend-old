@@ -390,6 +390,90 @@ module.exports.getModels = asyncHandler(async (req, res, next) => {
         .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
 });
 
+module.exports.getAllYearModels = asyncHandler(async (req, res, next) => {
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {
+        published: true,
+        // year: { [Op.gte]: new Date().getFullYear() }
+    };
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        raw: true,
+        where
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let models = { rows: [], count: 0 };
+
+    models = await Model.findAndCountAll(conditions);
+
+    models.rows = await Promise.all(
+        models.rows.map(async model => {
+            model.brand = await CarBrand.findByPk(model.brand);
+            if (model.highTrim) {
+                model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
+                model.mainTrim.images = await TrimImages.findAll({
+                    where: {
+                        trimId: model.mainTrim.id
+                    }
+                })
+                model.mainTrim.videos = await TrimVideos.findAll({
+                    where: {
+                        trimId: model.mainTrim.id
+                    }
+                })
+            } else {
+                model.mainTrim = await Trim.findOne({
+                    where: {
+                        model: model.id,
+                        published: true
+                    },
+                    raw: true
+                });
+                if (model.mainTrim) {
+                    model.mainTrim.images = await TrimImages.findAll({
+                        where: {
+                            trimId: model.mainTrim?.id
+                        }
+                    })
+                    model.mainTrim.videos = await TrimVideos.findAll({
+                        where: {
+                            trimId: model.mainTrim?.id
+                        }
+                    })
+                }
+
+            }
+
+            return model;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
+});
+
 module.exports.searchModels = asyncHandler(async (req, res, next) => {
 
     const { query } = req;
