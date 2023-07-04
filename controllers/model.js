@@ -391,127 +391,87 @@ module.exports.getModels = asyncHandler(async (req, res, next) => {
 });
 
 module.exports.getAllYearModelsURL = asyncHandler(async (req, res, next) => {
+
     const { query } = req;
 
     let isAll = query.isAll ?? false;
+
     let pageSize = query.pageSize ?? 10;
     let currentPage = query.currentPage ?? 1;
-    let orderBy = query.orderBy ? [[query.orderBy, "ASC"]] : null;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
     let where = {
         published: true,
         // year: { [Op.gte]: new Date().getFullYear() }
     };
-
     if (query.search) {
-        where.name = { [Op.iLike]: `%${query.search}%` };
+        where.name = { [Op.iLike]: `%${query.search}%` }
     }
 
     let conditions = {
         raw: true,
-        where,
+        where
     };
-
     if (!isAll) {
         conditions = {
             where,
             limit: pageSize,
             offset: (currentPage - 1) * pageSize,
             order: orderBy,
-            raw: true,
-        };
+            raw: true
+        }
     }
 
     let models = { rows: [], count: 0 };
+
     models = await Model.findAndCountAll(conditions);
 
-    let allUrls = []; // Array to store all URLs
-
-    await Promise.all(
-        models.rows.map(async (model) => {
+    models.rows = await Promise.all(
+        models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
             if (model.highTrim) {
                 model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
-                model.allYearMainTrims = await Trim.findAll({
-                    attributes: ["id", "name", "year", "featuredImage", "slug"],
+                model.mainTrim.images = await TrimImages.findAll({
                     where: {
-                        model: model.id,
-                        slug: model.mainTrim.slug,
-                        published: true,
-                    },
-                    raw: true,
-                });
-
-                let possibleYears = [2023, 2022, 2021, 2020];
-                let trimYears = model.allYearMainTrims.map((item) => item.year);
-                await Promise.all(
-                    possibleYears.map(async (year) => {
-                        if (!trimYears.find((val) => val == year)) {
-                            let yearTrim = await Trim.findOne({
-                                attributes: ["id", "name", "year", "featuredImage", "slug"],
-                                where: {
-                                    model: model.id,
-                                    year,
-                                    published: true,
-                                },
-                                raw: true,
-                            });
-                            if (yearTrim) {
-                                model.allYearMainTrims.push(yearTrim);
-                            }
-                        }
-                    })
-                );
-
-                model.allYearMainTrims = _.sortBy(model.allYearMainTrims, "year", "desc");
-
-                // Create an array of URLs using the data
-                let modelUrls = model.allYearMainTrims.map((trim) => {
-                    if (trim && trim.year) { // Check if trim and trim.year exist
-                        return `https://carprices.ae/brands/${model.brand.slug}/${trim.year}/${model.slug}`;
+                        trimId: model.mainTrim.id
                     }
-                    return null;
-                });
-
-                // Filter out any null or "undefined" values
-                modelUrls = modelUrls.filter((url) => url !== null && url !== undefined);
-
-                // Concatenate the URLs to the allUrls array
-                allUrls = allUrls.concat(modelUrls);
+                })
+                model.mainTrim.videos = await TrimVideos.findAll({
+                    where: {
+                        trimId: model.mainTrim.id
+                    }
+                })
             } else {
                 model.mainTrim = await Trim.findOne({
                     where: {
                         model: model.id,
-                        published: true,
+                        published: true
                     },
-                    raw: true,
+                    raw: true
                 });
                 if (model.mainTrim) {
                     model.mainTrim.images = await TrimImages.findAll({
                         where: {
-                            trimId: model.mainTrim?.id,
-                        },
-                    });
+                            trimId: model.mainTrim?.id
+                        }
+                    })
                     model.mainTrim.videos = await TrimVideos.findAll({
                         where: {
-                            trimId: model.mainTrim?.id,
-                        },
-                    });
+                            trimId: model.mainTrim?.id
+                        }
+                    })
                 }
 
-                // Create the URL
-                let modelUrl = `https://carprices.ae/brands/${model.brand.slug}/${model.mainTrim?.year}/${model.slug}`;
-
-                // Add the URL to the allUrls array if it's not "undefined"
-                if (modelUrl !== "https://carprices.ae/brands/undefined/undefined/undefined") {
-                    allUrls.push(modelUrl);
-                }
             }
-        })
-    );
 
-    res.status(200).json({
-        urls: allUrls,
-    });
+            return model;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ models: models.rows, modelsCount: models.count, totalPage: Math.ceil(models.count / pageSize) });
 });
 
 module.exports.searchModels = asyncHandler(async (req, res, next) => {
