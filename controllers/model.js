@@ -430,40 +430,15 @@ module.exports.getAllYearModels = asyncHandler(async (req, res, next) => {
     models.rows = await Promise.all(
         models.rows.map(async model => {
             model.brand = await CarBrand.findByPk(model.brand);
-            if (model.highTrim) {
-                model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
-                model.mainTrim.images = await TrimImages.findAll({
-                    where: {
-                        trimId: model.mainTrim.id
-                    }
-                })
-                model.mainTrim.videos = await TrimVideos.findAll({
-                    where: {
-                        trimId: model.mainTrim.id
-                    }
-                })
-            } else {
-                model.mainTrim = await Trim.findOne({
+  
+                model.mainTrim = await Trim.findAll({
+                    attributes: ["id", "name", "year", "featuredImage", "slug"],
                     where: {
                         model: model.id,
                         published: true
                     },
                     raw: true
                 });
-                if (model.mainTrim) {
-                    model.mainTrim.images = await TrimImages.findAll({
-                        where: {
-                            trimId: model.mainTrim?.id
-                        }
-                    })
-                    model.mainTrim.videos = await TrimVideos.findAll({
-                        where: {
-                            trimId: model.mainTrim?.id
-                        }
-                    })
-                }
-
-            }
 
             return model;
         })
