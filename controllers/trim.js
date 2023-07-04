@@ -504,6 +504,63 @@ module.exports.updateTrim = asyncHandler(async (req, res, next) => {
     res.status(201).json({ message: "Trim Updated" });
 });
 
+module.exports.getAllTrims = asyncHandler(async (req, res, next) => {
+
+    const { query } = req;
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    let where = {
+        published: true
+    };
+    let conditions = {
+        raw: true,
+        order: orderBy,
+        where
+    };
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+
+    if (!isAll) {
+        conditions = {
+            where,
+            limit: pageSize,
+            offset: (currentPage - 1) * pageSize,
+            order: orderBy,
+            raw: true
+        }
+    }
+
+    let trims = { rows: [], count: 0 };
+
+    trims = await Trim.findAndCountAll({ attributes: ["id", "year", "slug", "brand", "model"], conditions });
+
+    trims.rows = await Promise.all(
+        trims.rows.map(async trim => {
+            trim.brand = await CarBrand.findByPk(trim.brand, {
+                attributes: ["id", "slug"]
+            });
+            trim.model = await Model.findByPk(trim.model, {
+                attributes: ["id", "slug"]
+            });
+
+            return trim;
+        })
+    )
+
+    res
+        .status(200)
+        .json({ trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize) });
+});
+
+
 module.exports.getTrimsByModel = asyncHandler(async (req, res, next) => {
 
     const { model } = req.params;
@@ -653,7 +710,7 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
 
     let possibleYears = [2023, 2022, 2021, 2020]
     let trimYears = trim.allYearMainTrims.map(item => item.year)
-    
+
     await Promise.all(
         possibleYears.map(async year => {
             if (!trimYears.find(val => val == year)) {
@@ -674,7 +731,7 @@ module.exports.getTrimsBySlug = asyncHandler(async (req, res, next) => {
         })
     )
 
-    trim.allYearMainTrims = _.sortBy(trim.allYearMainTrims, 'year' , 'desc')
+    trim.allYearMainTrims = _.sortBy(trim.allYearMainTrims, 'year', 'desc')
 
 
     res
@@ -814,7 +871,7 @@ module.exports.getTrimsBySlugAndYearWithModel = asyncHandler(async (req, res, ne
 
     let possibleYears = [2023, 2022, 2021, 2020]
     let trimYears = trim.allYearMainTrims.map(item => item.year)
-    
+
     await Promise.all(
         possibleYears.map(async year => {
             if (!trimYears.find(val => val == year)) {
@@ -835,7 +892,7 @@ module.exports.getTrimsBySlugAndYearWithModel = asyncHandler(async (req, res, ne
         })
     )
 
-    trim.allYearMainTrims = _.sortBy(trim.allYearMainTrims, 'year' , 'desc')
+    trim.allYearMainTrims = _.sortBy(trim.allYearMainTrims, 'year', 'desc')
 
     trim.allTrims = await Trim.findAll({
         // attributes: ["id", "name", "year", "featuredImage", "slug"],
@@ -3603,7 +3660,7 @@ module.exports.handleOldURLRedirect = asyncHandler(async (req, res, next) => {
     if (!trim) {
         res
             .status(404)
-            .json({message: "Trim not found"});
+            .json({ message: "Trim not found" });
         return
     }
 
@@ -3614,7 +3671,7 @@ module.exports.handleOldURLRedirect = asyncHandler(async (req, res, next) => {
 
     res
         .status(200)
-        .json({trim});
+        .json({ trim });
 
 
 });

@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middlewares/auth");
-const { getTrimsByModel, getTrimsBySlug, getTrimsYearByModel, getTrimsBySlugAndYear, getTrimsByFilter, getTrimsBodyType, getTrimsFuelType, getTrimsByAdvancedSearch, getTrimsBySlugAndYearWithModel, getCompareTrims, getTrimsByModelMin, getTrimsByModelMinAndYear, getTrimsBodyTypeDynamic, getTrimsFuelTypeDynamic, getTrimsTransmissions, getTrimsTransmissionsDynamic, getTrimsCylinderNoDynamic, getTrimsCylinderNo, getTrimsDriveType, getTrimsDriveTypeDynamic, handleOldURLRedirect } = require("../controllers/trim");
+const {getAllTrims, getTrimsByModel, getTrimsBySlug, getTrimsYearByModel, getTrimsBySlugAndYear, getTrimsByFilter, getTrimsBodyType, getTrimsFuelType, getTrimsByAdvancedSearch, getTrimsBySlugAndYearWithModel, getCompareTrims, getTrimsByModelMin, getTrimsByModelMinAndYear, getTrimsBodyTypeDynamic, getTrimsFuelTypeDynamic, getTrimsTransmissions, getTrimsTransmissionsDynamic, getTrimsCylinderNoDynamic, getTrimsCylinderNo, getTrimsDriveType, getTrimsDriveTypeDynamic, handleOldURLRedirect } = require("../controllers/trim");
 
+router.route("/").get(getAllTrims);
 router.route("/by-model/:model").get(getTrimsByModel);
 router.route("/by-model/min/:model").get(getTrimsByModelMin);
 router.route("/by-model/min/:model/:year").get(getTrimsByModelMinAndYear);
