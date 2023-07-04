@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middlewares/auth");
-const { getModels,getAllYearModels, getFeaturedModels, getElectricFeaturedModels, getModelsByBrand, getModelsByBrandAndYear, getModelsByBrandSlug, getModelsByBrandAndYearSlug, getModelsByBrandMin, getModelsBySlug, searchModels, topMostSearchedCars, compareCarModels, getSpecificModels, getModelsBySlugAndYear, getModelsBySlugBrandAndYear, getModelsBySlugBrand, getPopularModelsByBrand, handleOldModelURLRedirect, getOldSlugModel } = require("../controllers/model");
+const { getModels,getAllYearModelsURL, getFeaturedModels, getElectricFeaturedModels, getModelsByBrand, getModelsByBrandAndYear, getModelsByBrandSlug, getModelsByBrandAndYearSlug, getModelsByBrandMin, getModelsBySlug, searchModels, topMostSearchedCars, compareCarModels, getSpecificModels, getModelsBySlugAndYear, getModelsBySlugBrandAndYear, getModelsBySlugBrand, getPopularModelsByBrand, handleOldModelURLRedirect, getOldSlugModel } = require("../controllers/model");
 
 router.route("/").get(getModels);
-router.route("/getallyearmodels").get(getAllYearModels);
+router.route("/getallyearmodelsurl").get(getAllYearModelsURL);
 router.route("/search").get(searchModels);
 router.route("/top-searched").get(topMostSearchedCars);
 router.route("/popular-by-brand").post(getPopularModelsByBrand);
