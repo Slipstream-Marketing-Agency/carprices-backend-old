@@ -3353,6 +3353,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
         });
 });
 
+
 module.exports.getCarBrandsDynamic = asyncHandler(async (req, res, next) => {
 
     const { body, query } = req;
