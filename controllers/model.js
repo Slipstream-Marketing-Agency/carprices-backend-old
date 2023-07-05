@@ -798,96 +798,99 @@ module.exports.getModelsByBrandSlug = asyncHandler(async (req, res, next) => {
 
 module.exports.getModelsTableListByBrandSlug = asyncHandler(async (req, res, next) => {
     const { brand } = req.params;
-
+  
     const brandData = await CarBrand.findOne({
-        where: {
-            slug: brand
-        }
+      where: {
+        slug: brand
+      }
     });
-
+  
     if (!brandData) {
-        return res.status(404).json({ message: "Brand not found!" });
+      return res.status(404).json({ message: "Brand not found!" });
     }
-
+  
     const { query } = req;
-
+  
     let isAll = query.isAll ?? false;
     let pageSize = query.pageSize ?? 10;
     let currentPage = query.currentPage ?? 1;
     let orderBy = query.orderBy ? [[query.orderBy, "ASC"]] : null;
     let where = {
-        brand: brandData.id,
-        published: true
+      brand: brandData.id,
+      published: true
     };
-
+  
     if (query.search) {
-        where.name = { [Op.iLike]: `%${query.search}%` };
+      where.name = { [Op.iLike]: `%${query.search}%` };
     }
-
+  
     let conditions = {
-        raw: true,
-        where
+      raw: true,
+      where
     };
-
+  
     if (!isAll) {
-        conditions = {
-            where,
-            limit: pageSize,
-            offset: (currentPage - 1) * pageSize,
-            order: orderBy,
-            raw: true
-        };
+      conditions = {
+        where,
+        limit: pageSize,
+        offset: (currentPage - 1) * pageSize,
+        order: orderBy,
+        raw: true
+      };
     }
-
+  
     let models = { rows: [], count: 0 };
-
+  
     models = await Model.findAndCountAll(conditions);
-
+  
     models.rows = await Promise.all(
-        models.rows.map(async (model) => {
-            model.brand = await CarBrand.findByPk(model.brand);
-            if (model.highTrim) {
-                model.mainTrim = await Trim.findByPk(model.highTrim);
-            } else {
-                model.mainTrim = await Trim.findOne({
-                    where: {
-                        model: model.id,
-                        published: true
-                    }
-                });
+      models.rows.map(async (model) => {
+        model.brand = await CarBrand.findByPk(model.brand);
+        if (model.highTrim) {
+          model.mainTrim = await Trim.findByPk(model.highTrim);
+        } else {
+          model.mainTrim = await Trim.findOne({
+            where: {
+              model: model.id,
+              published: true
             }
-
-            // Include trims of the model
-            model.trims = await Trim.findAll({
-                where: {
-                    model: model.id,
-                    published: true,
-                    price: {
-                        [Op.not]: null
-                    }
-                }
-            });
-
-            // Filter the model attributes here
-            const filteredModel = {
-                name: model.name,
-                year: model.year,
-                slug: model.slug,
-                minPrice: model.trims.length ? Math.min(...model.trims.map((trim) => trim.price)) : null,
-                maxPrice: model.trims.length ? Math.max(...model.trims.map((trim) => trim.price)) : null,
-            };
-
-            return filteredModel;
-        })
+          });
+        }
+  
+        // Include trims of the model
+        model.trims = await Trim.findAll({
+          where: {
+            model: model.id,
+            published: true,
+            year: 2023,
+            price: {
+              [Op.not]: null
+            }
+          }
+        });
+  
+        // Filter the model attributes here
+        const filteredModel = {
+          name: model.name,
+          year: model.year,
+          slug: model.slug,
+          brandSlug:model.brand.slug,
+          minPrice: model.trims.length ? Math.min(...model.trims.map((trim) => trim.price)) : null,
+          maxPrice: model.trims.length ? Math.max(...model.trims.map((trim) => trim.price)) : null,
+        //   trims: model.trims
+        };
+  
+        return filteredModel;
+      })
     );
-
+  
     res.status(200).json({
-        models: models.rows,
-        modelsCount: models.count,
-        totalPage: Math.ceil(models.count / pageSize)
+      models: models.rows,
+      modelsCount: models.count,
+      totalPage: Math.ceil(models.count / pageSize)
     });
-});
-
+  });
+  
 
 
 module.exports.getModelsByBrandAndYear = asyncHandler(async (req, res, next) => {
