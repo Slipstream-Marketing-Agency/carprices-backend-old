@@ -399,7 +399,6 @@ module.exports.getAllYearModelsURL = asyncHandler(async (req, res, next) => {
     let orderBy = query.orderBy ? [[query.orderBy, "ASC"]] : null;
     let where = {
         published: true,
-        // year: { [Op.gte]: new Date().getFullYear() }
     };
 
     if (query.search) {
@@ -429,13 +428,14 @@ module.exports.getAllYearModelsURL = asyncHandler(async (req, res, next) => {
     await Promise.all(
         models.rows.map(async (model) => {
             model.brand = await CarBrand.findByPk(model.brand);
+
             if (model.highTrim) {
                 model.mainTrim = await Trim.findByPk(model.highTrim, { raw: true });
                 model.allYearMainTrims = await Trim.findAll({
                     attributes: ["id", "name", "year", "featuredImage", "slug"],
                     where: {
                         model: model.id,
-                        slug: model.mainTrim.slug,
+                        slug: model.mainTrim?.slug, // Check if mainTrim exists
                         published: true,
                     },
                     raw: true,
@@ -466,8 +466,8 @@ module.exports.getAllYearModelsURL = asyncHandler(async (req, res, next) => {
 
                 // Create an array of URLs using the data
                 let modelUrls = model.allYearMainTrims.map((trim) => {
-                    if (trim && trim.year) { // Check if trim and trim.year exist
-                        return `https://carprices.ae/brands/${model.brand.slug}/${trim.year}/${model.slug}`;
+                    if (trim && trim.year && model.brand && trim.slug) { // Check if required properties exist
+                        return `https://carprices.ae/brands/${model?.brand.slug}/${trim?.year}/${model?.slug}`;
                     }
                     return null;
                 });
@@ -488,22 +488,24 @@ module.exports.getAllYearModelsURL = asyncHandler(async (req, res, next) => {
                 if (model.mainTrim) {
                     model.mainTrim.images = await TrimImages.findAll({
                         where: {
-                            trimId: model.mainTrim?.id,
+                            trimId: model.mainTrim.id, // Check if mainTrim exists
                         },
                     });
                     model.mainTrim.videos = await TrimVideos.findAll({
                         where: {
-                            trimId: model.mainTrim?.id,
+                            trimId: model.mainTrim.id, // Check if mainTrim exists
                         },
                     });
                 }
 
-                // Create the URL
-                let modelUrl = `https://carprices.ae/brands/${model.brand.slug}/${model.mainTrim?.year}/${model.slug}`;
+                // Create the URL if required properties exist
+                if (model.brand && model.mainTrim?.year && model.slug) {
+                    let modelUrl = `https://carprices.ae/brands/${model?.brand?.slug}/${model?.mainTrim?.year}/${model?.slug}`;
 
-                // Add the URL to the allUrls array if it's not "undefined"
-                if (modelUrl !== "https://carprices.ae/brands/undefined/undefined/undefined") {
-                    allUrls.push(modelUrl);
+                    // Add the URL to the allUrls array if it's not "undefined"
+                    if (modelUrl !== "https://carprices.ae/brands/undefined/undefined/undefined") {
+                        allUrls.push(modelUrl);
+                    }
                 }
             }
         })
@@ -513,6 +515,7 @@ module.exports.getAllYearModelsURL = asyncHandler(async (req, res, next) => {
         urls: allUrls,
     });
 });
+
 
 module.exports.searchModels = asyncHandler(async (req, res, next) => {
 
