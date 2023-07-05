@@ -3094,6 +3094,8 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 
     let trims = { rows: [], count: 0 };
 
+
+
     trims.count = await Trim.count({
         where,
         distinct: true,
@@ -3211,6 +3213,8 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 
     //  = await Trim.findAll(conditions);
 
+    let bodyTypeCounts = [];
+
     trims.rows = await Promise.all(
         trims.rows.map(async trim => {
             trim.brand = await CarBrand.findByPk(trim.brand);
@@ -3265,13 +3269,88 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
                 }
             })
 
+            // Increment the count for each body type
+            if (trim.bodyType) {
+                const index = bodyTypeCounts.findIndex(
+                    (item) => item.name === trim.bodyType
+                );
+                if (index !== -1) {
+                    bodyTypeCounts[index].count++;
+                } else {
+                    bodyTypeCounts.push({ name: trim.bodyType, count: 1 });
+                }
+            }
+
             return trim;
         })
     )
 
+    let minPriceTrim = await Trim.findOne({
+        where: {
+            ...where,
+            price: {
+                [Op.not]: null
+            }
+        },
+        order: [["price", "ASC"]],
+        attributes: ["model", "price", "power", "year"],
+        raw: true,
+    });
+
+    if (minPriceTrim) {
+        let modelId = minPriceTrim.model;
+        let model = await Model.findByPk(modelId, {
+            attributes: ["id", "name", "slug"],
+        });
+        minPriceTrim.model = model;
+    }
+
+    let maxPriceTrim = await Trim.findOne({
+        where: {
+            ...where,
+            price: {
+                [Op.not]: null
+            }
+        },
+        order: [["price", "DESC"]],
+        attributes: ["model", "price", "power", "year"],
+        raw: true,
+    });
+    if (maxPriceTrim) {
+        let modelId = maxPriceTrim.model;
+        let model = await Model.findByPk(modelId, {
+            attributes: ["id", "name", "slug"],
+        });
+        maxPriceTrim.model = model;
+    }
+
+    let maxPowerTrim = await Trim.findOne({
+        where: {
+            ...where,
+            power: {
+                [Op.not]: null
+            }
+        },
+        order: [["power", "DESC"]],
+        attributes: ["model", "price", "power", "year"],
+        raw: true
+    });
+
+    // Retrieve the associated Model for maxPowerTrim
+    if (maxPowerTrim && maxPowerTrim.model) {
+        let modelId = maxPowerTrim.model;
+        let model = await Model.findByPk(modelId, {
+            attributes: ["id", "name", "slug"],
+        });
+        maxPowerTrim.model = model;
+    }
+
     res
         .status(200)
-        .json({ trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize) });
+        .json({
+            trims: trims.rows, trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize), bodyTypeCounts: bodyTypeCounts, minPriceTrim: minPriceTrim,
+            maxPriceTrim: maxPriceTrim, maxPowerTrim: maxPowerTrim
+        });
 });
 
 module.exports.getCarBrandsDynamic = asyncHandler(async (req, res, next) => {
