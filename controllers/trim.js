@@ -3293,14 +3293,14 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
             }
         },
         order: [["price", "ASC"]],
-        attributes: ["model", "price", "power", "year"],
+        attributes: ["model", "price", "power", "year", "slug", "name"],
         raw: true,
     });
 
     if (minPriceTrim) {
         let modelId = minPriceTrim.model;
         let model = await Model.findByPk(modelId, {
-            attributes: ["id", "name", "slug"],
+            attributes: ["id", "name", "slug", "year"],
         });
         minPriceTrim.model = model;
     }
@@ -3313,13 +3313,13 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
             }
         },
         order: [["price", "DESC"]],
-        attributes: ["model", "price", "power", "year"],
+        attributes: ["model", "price", "power", "year", "slug", "name"],
         raw: true,
     });
     if (maxPriceTrim) {
         let modelId = maxPriceTrim.model;
         let model = await Model.findByPk(modelId, {
-            attributes: ["id", "name", "slug"],
+            attributes: ["id", "name", "slug", "year"],
         });
         maxPriceTrim.model = model;
     }
@@ -3332,7 +3332,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
             }
         },
         order: [["power", "DESC"]],
-        attributes: ["model", "price", "power", "year"],
+        attributes: ["model", "price", "power", "year", "slug", "name"],
         raw: true
     });
 
@@ -3340,7 +3340,7 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
     if (maxPowerTrim && maxPowerTrim.model) {
         let modelId = maxPowerTrim.model;
         let model = await Model.findByPk(modelId, {
-            attributes: ["id", "name", "slug"],
+            attributes: ["id", "name", "slug", "year"],
         });
         maxPowerTrim.model = model;
     }
