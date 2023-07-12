@@ -3354,6 +3354,471 @@ module.exports.getTrimsByAdvancedSearch = asyncHandler(async (req, res, next) =>
 });
 
 
+module.exports.getTrimsBrandPageProperties = asyncHandler(async (req, res, next) => {
+
+    const { body, query } = req;
+
+    let where = {
+        year: { [Op.gte]: new Date().getFullYear() },
+        published: true
+    };
+
+    if (query.isLuxury) {
+        where.isLuxury = true
+    }
+
+    if (query.isPremiumLuxury) {
+        where.isPremiumLuxury = true
+    }
+
+    if (query.isSafety) {
+        where.isSafety = true
+    }
+
+    if (query.isFuelEfficient) {
+        where.isFuelEfficient = true
+    }
+
+    if (query.isOffRoad) {
+        where.isOffRoad = true
+    }
+
+    if (query.haveMusic) {
+        where.haveMusic = true
+    }
+
+    if (query.haveTechnology) {
+        where.haveTechnology = true
+    }
+
+    if (query.havePerformance) {
+        where.havePerformance = true
+    }
+
+    if (query.isSpacious) {
+        where.isSpacious = true
+    }
+
+    if (query.isElectric) {
+        where.isElectric = true
+    }
+
+    let seatingCapacity = []
+
+    if (query.isTwoSeat) {
+        seatingCapacity.push("2 Seater")
+    }
+
+    if (query.isTwoPlusTwo) {
+        seatingCapacity.push("2 Seater")
+        seatingCapacity.push("4 Seater")
+    }
+
+    if (query.isFourToFive) {
+        seatingCapacity.push("4 Seater")
+        seatingCapacity.push("5 Seater")
+    }
+
+    if (query.isFiveToSeven) {
+        seatingCapacity.push("5 Seater")
+        seatingCapacity.push("6 Seater")
+        seatingCapacity.push("7 Seater")
+    }
+
+    if (query.isSevenToNine) {
+        seatingCapacity.push("7 Seater")
+        seatingCapacity.push("8 Seater")
+        seatingCapacity.push("9 Seater")
+    }
+
+    seatingCapacity = [...new Set(seatingCapacity)]
+
+    if (seatingCapacity.length !== 0) {
+
+        where.seatingCapacity = { [Op.or]: seatingCapacity }
+    }
+
+    if (body.price && body.price.length != 0) {
+        where.price = {}
+        body.price.map(price => {
+            where.price = { ...where.price, [Op.gte]: price.min }
+            where.price = { ...where.price, [Op.lte]: price.max }
+        })
+    }
+
+    // if (body.min) {
+    //     where.price = {
+    //         // ...where.price,
+    //         [Op.gte]: body.min
+    //     }
+    // }
+
+    // if (body.max) {
+    //     where.price = {
+    //         ...where.price,
+    //         [Op.lte]: body.max
+    //     }
+    // }else{
+    //     delete where.price;
+    // }
+
+    if (body.power && body.power.length != 0) {
+        where.power = {}
+        body.power.map(power => {
+            where.power = { ...where.power, [Op.gte]: power.min }
+            where.power = { ...where.power, [Op.lte]: power.max }
+        })
+    }
+
+    if (body.displacement && body.displacement.length != 0) {
+        where.displacement = {}
+        body.displacement.map(displacement => {
+            where.displacement = { ...where.displacement, [Op.gte]: String(displacement.min) }
+            where.displacement = { ...where.displacement, [Op.lte]: String(displacement.max) }
+        })
+    }
+
+    if (body.fuelConsumption && body.fuelConsumption.length != 0) {
+        where.fuelConsumption = {}
+        body.fuelConsumption.map(fuelConsumption => {
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.gte]: Number(fuelConsumption.min) }
+            where.fuelConsumption = { ...where.fuelConsumption, [Op.lte]: Number(fuelConsumption.max) }
+        })
+    }
+
+
+
+    // where.power = {}
+
+    // if (body.minPower) {
+    //     where.power = {
+    //         ...where.power,
+    //         [Op.gte]: String(body.minPower)
+    //     }
+    // }
+
+    // if (body.maxPower) {
+    //     where.power = {
+    //         ...where.power,
+    //         [Op.lte]: String(body.maxPower)
+    //     }
+    // }
+
+    if (body.brand && body.brand.length != 0) {
+        where.brand = body.brand
+    }
+
+    if (body.bodyType && body.bodyType.length != 0) {
+        where.bodyType = body.bodyType
+    }
+
+    if (body.fuelType && body.fuelType.length != 0) {
+        where.fuelType = body.fuelType
+    }
+
+    if (body.transmission && body.transmission.length != 0) {
+        where.transmission = body.transmission
+    }
+
+    if (body.cylinders && body.cylinders.length != 0) {
+        let cylinders = body.cylinders.map((item) => String(item))
+        where.cylinders = cylinders
+    }
+
+    if (body.drive && body.drive.length != 0) {
+        where.drive = body.drive
+    }
+
+    let isAll = query.isAll ?? false;
+
+    let pageSize = query.pageSize ?? 10;
+    let currentPage = query.currentPage ?? 1;
+    let orderBy = query.orderBy ? [
+        [query.orderBy, "ASC"]
+    ] : null;
+    if (query.search) {
+        where.name = { [Op.iLike]: `%${query.search}%` }
+    }
+
+    let conditions = {
+        attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")), "model"]],
+        raw: true,
+        where,
+        // group: ['model']
+    };
+    if (!isAll) {
+        conditions = {
+            where,
+            // limit: pageSize,
+            // offset: (currentPage - 1) * pageSize,
+            // order: orderBy,
+            raw: true,
+            attributes: [[Sequelize.fn('DISTINCT', Sequelize.col("model")), "model"]],
+            // group: ['model']
+        }
+    }
+
+    let trims = { rows: [], count: 0 };
+
+
+
+    trims.count = await Trim.count({
+        where,
+        distinct: true,
+        col: 'model'
+    });
+
+    let trimItems = await Trim.findAll(conditions);
+
+    let modelIds = trimItems.map(trim => trim.model);
+
+    let modelByMainTrim = await Model.findAll({
+        attributes: ["id", "highTrim"],
+        where: {
+            id: modelIds
+        },
+        raw: true
+    })
+
+    modelByMainTrim = await Promise.all(
+        modelByMainTrim.map(async model => {
+
+            if (model.highTrim) {
+                model.mainTrim = { id: model.highTrim }
+                model.mainTrim = await Trim.findOne({
+                    attributes: ["id", "price", "year"],
+                    where: {
+                        id: model.highTrim,
+                    },
+                    raw: true
+                });
+                model.lowPrice = await Trim.min("price", {
+                    where: {
+                        model: model.id,
+                        year: model.mainTrim.year,
+                        published: true
+                    }
+                })
+                model.lowTrim = await Trim.findOne({
+                    attributes: ["id", "price"],
+                    where: {
+                        id: model.highTrim,
+                        published: true
+                    },
+                    order: [["price", "ASC"]],
+                    raw: true
+                });
+            } else {
+                let highestYear = await Trim.max("year", {
+                    where: {
+                        model: model.id,
+                        published: true
+                    },
+                })
+                model.mainTrim = await Trim.findOne({
+                    attributes: ["id", "price"],
+                    where: {
+                        model: model.id,
+                        year: highestYear,
+                        published: true
+                    },
+                    raw: true
+                });
+                model.lowPrice = await Trim.min("price", {
+                    where: {
+                        model: model.id,
+                        year: highestYear,
+                        published: true
+                    }
+                })
+                model.lowTrim = await Trim.findOne({
+                    attributes: ["id", "price"],
+                    where: {
+                        model: model.id,
+                        year: highestYear,
+                        published: true
+                    },
+                    order: [["price", "ASC"]],
+                    raw: true
+                });
+            }
+
+            return model;
+        })
+    )
+
+    modelByMainTrim = modelByMainTrim.filter(trim => trim.lowPrice != null)
+
+    modelByMainTrim = _.sortBy(modelByMainTrim, trim => trim.lowPrice);
+
+    trims.count = modelByMainTrim.length
+
+    modelByMainTrim = _.slice(modelByMainTrim, (currentPage - 1) * pageSize, (currentPage - 1) * pageSize + Number(pageSize));
+    // modelByMainTrim = _(modelByMainTrim).drop(skipCount).take(takeCount).value()
+
+    let trimIds = modelByMainTrim.map(model => model.mainTrim.id)
+
+    conditions.where = {
+        id: trimIds
+    }
+    conditions.orderBy = orderBy
+
+    delete conditions.attributes;
+    delete conditions.offset;
+    delete conditions.limit;
+
+    // trimIds = _.take(trimIds, )
+    // trimIds = _(trimIds).drop(skipCount).take(takeCount).value()
+
+    trims.rows = await Promise.all(
+        modelByMainTrim.map(async trim => await Trim.findByPk(trim.mainTrim.id, {
+            // attributes: ["id", "brand", "model", "year", "name", "featuredImage", "slug"],
+            raw: true
+        }))
+    )
+
+    //  = await Trim.findAll(conditions);
+
+    let bodyTypeCounts = [];
+
+    trims.rows = await Promise.all(
+        trims.rows.map(async trim => {
+            trim.brand = await CarBrand.findByPk(trim.brand);
+            trim.minPrice = await Trim.min("price", {
+                where: {
+                    model: trim.model,
+                    year: trim.year,
+                    published: true
+                }
+            })
+            trim.maxPrice = await Trim.max("price", {
+                where: {
+                    model: trim.model,
+                    year: trim.year,
+                    published: true
+                }
+            })
+            trim.allTrimsCount = await Trim.count({
+                where: {
+                    model: trim.model,
+                    year: trim.year,
+                    published: true
+                    // id: {
+                    //     [Op.ne]: trim.id
+                    // }
+                },
+            })
+            trim.allTrims = await Trim.findAll({
+                attributes: ['id', 'name', 'slug', 'featuredImage'],
+                where: {
+                    model: trim.model,
+                    year: trim.year,
+                    published: true
+                    // id: {
+                    //     [Op.ne]: trim.id
+                    // }
+                },
+                // limit: 5,
+                raw: true
+            })
+            trim.model = await Model.findByPk(trim.model, {
+                attributes: ["id", "name", "slug"]
+            });
+            trim.images = await TrimImages.findAll({
+                where: {
+                    trimId: trim.id
+                }
+            })
+            trim.videos = await TrimVideos.findAll({
+                where: {
+                    trimId: trim.id
+                }
+            })
+
+            // Increment the count for each body type
+            if (trim.bodyType) {
+                const index = bodyTypeCounts.findIndex(
+                    (item) => item.name === trim.bodyType
+                );
+                if (index !== -1) {
+                    bodyTypeCounts[index].count++;
+                } else {
+                    bodyTypeCounts.push({ name: trim.bodyType, count: 1 });
+                }
+            }
+
+            return trim;
+        })
+    )
+
+    let minPriceTrim = await Trim.findOne({
+        where: {
+            ...where,
+            price: {
+                [Op.not]: null
+            }
+        },
+        order: [["price", "ASC"]],
+        attributes: ["model", "price", "power", "year", "slug", "name"],
+        raw: true,
+    });
+
+    if (minPriceTrim) {
+        let modelId = minPriceTrim.model;
+        let model = await Model.findByPk(modelId, {
+            attributes: ["id", "name", "slug", "year"],
+        });
+        minPriceTrim.model = model;
+    }
+
+    let maxPriceTrim = await Trim.findOne({
+        where: {
+            ...where,
+            price: {
+                [Op.not]: null
+            }
+        },
+        order: [["price", "DESC"]],
+        attributes: ["model", "price", "power", "year", "slug", "name"],
+        raw: true,
+    });
+    if (maxPriceTrim) {
+        let modelId = maxPriceTrim.model;
+        let model = await Model.findByPk(modelId, {
+            attributes: ["id", "name", "slug", "year"],
+        });
+        maxPriceTrim.model = model;
+    }
+
+    let maxPowerTrim = await Trim.findOne({
+        where: {
+            ...where,
+            power: {
+                [Op.not]: null
+            }
+        },
+        order: [["power", "DESC"]],
+        attributes: ["model", "price", "power", "year", "slug", "name"],
+        raw: true
+    });
+
+    // Retrieve the associated Model for maxPowerTrim
+    if (maxPowerTrim && maxPowerTrim.model) {
+        let modelId = maxPowerTrim.model;
+        let model = await Model.findByPk(modelId, {
+            attributes: ["id", "name", "slug", "year"],
+        });
+        maxPowerTrim.model = model;
+    }
+
+    res
+        .status(200)
+        .json({trimsCount: trims.count, totalPage: Math.ceil(trims.count / pageSize), bodyTypeCounts: bodyTypeCounts, minPriceTrim: minPriceTrim,
+            maxPriceTrim: maxPriceTrim, maxPowerTrim: maxPowerTrim
+        });
+});
+
+
 module.exports.getCarBrandsDynamic = asyncHandler(async (req, res, next) => {
 
     const { body, query } = req;

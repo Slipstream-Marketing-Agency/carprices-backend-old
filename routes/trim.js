@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { protect } = require("../middlewares/auth");
-const {getAllTrims, getTrimsByModel, getTrimsBySlug, getTrimsYearByModel, getTrimsBySlugAndYear, getTrimsByFilter, getTrimsBodyType, getTrimsFuelType, getTrimsByAdvancedSearch, getTrimsBySlugAndYearWithModel, getCompareTrims, getTrimsByModelMin, getTrimsByModelMinAndYear, getTrimsBodyTypeDynamic, getTrimsFuelTypeDynamic, getTrimsTransmissions, getTrimsTransmissionsDynamic, getTrimsCylinderNoDynamic, getTrimsCylinderNo, getTrimsDriveType, getTrimsDriveTypeDynamic, handleOldURLRedirect } = require("../controllers/trim");
+const {getAllTrims, getTrimsByModel, getTrimsBySlug,getTrimsBrandPageProperties, getTrimsYearByModel, getTrimsBySlugAndYear, getTrimsByFilter, getTrimsBodyType, getTrimsFuelType, getTrimsByAdvancedSearch, getTrimsBySlugAndYearWithModel, getCompareTrims, getTrimsByModelMin, getTrimsByModelMinAndYear, getTrimsBodyTypeDynamic, getTrimsFuelTypeDynamic, getTrimsTransmissions, getTrimsTransmissionsDynamic, getTrimsCylinderNoDynamic, getTrimsCylinderNo, getTrimsDriveType, getTrimsDriveTypeDynamic, handleOldURLRedirect } = require("../controllers/trim");
 
 router.route("/").get(getAllTrims);
 router.route("/by-model/:model").get(getTrimsByModel);
@@ -17,6 +17,7 @@ router.route("/transmissions/list").get(getTrimsTransmissions).post(getTrimsTran
 router.route("/cylinder-no/list").get(getTrimsCylinderNo).post(getTrimsCylinderNoDynamic);
 router.route("/drive-type/list").get(getTrimsDriveType).post(getTrimsDriveTypeDynamic);
 router.route("/filter/advanced").post(getTrimsByAdvancedSearch)
+router.route("/filter/brand-page-properties").post(getTrimsBrandPageProperties)
 router.route("/:trim/:year").get(getTrimsBySlugAndYear);
 router.route("/:model/:trim/:year").get(getTrimsBySlugAndYearWithModel);
 router.route("/redirect").post(handleOldURLRedirect)
