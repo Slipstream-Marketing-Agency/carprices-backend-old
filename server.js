@@ -5,8 +5,8 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require("colors");
 const { errorHandler } = require("./middlewares/errorHandler");
-const temporaryRedirects = require("./temporaryRedirects.json");
-const permanentRedirects = require("./permanentRedirects.json");
+// const temporaryRedirects = require("./temporaryRedirects.json");
+// const permanentRedirects = require("./permanentRedirects.json");
 
 
 // Import Models
@@ -40,21 +40,21 @@ app.use((req, res, next) => {
 
 // Redirection middleware
 
-app.use((req, res, next) => {
-  const { path } = req;
-  const temporaryRedirect = temporaryRedirects.find((redirection) => redirection.from === path);
-  const permanentRedirect = permanentRedirects.find((redirection) => redirection.from === path);
+// app.use((req, res, next) => {
+//   const { path } = req;
+//   const temporaryRedirect = temporaryRedirects.find((redirection) => redirection.from === path);
+//   const permanentRedirect = permanentRedirects.find((redirection) => redirection.from === path);
 
-  if (temporaryRedirect) {
-    return res.redirect(307, temporaryRedirect.to); // 302 for temporary redirect
-  }
+//   if (temporaryRedirect) {
+//     return res.redirect(307, temporaryRedirect.to); // 302 for temporary redirect
+//   }
 
-  if (permanentRedirect) {
-    return res.redirect(308, permanentRedirect.to); // 301 for permanent redirect
-  }
+//   if (permanentRedirect) {
+//     return res.redirect(308, permanentRedirect.to); // 301 for permanent redirect
+//   }
 
-  next();
-});
+//   next();
+// });
 
 // Route files
 const common = require("./routes/common");
