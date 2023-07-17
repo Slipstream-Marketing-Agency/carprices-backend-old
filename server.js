@@ -5,6 +5,9 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require("colors");
 const { errorHandler } = require("./middlewares/errorHandler");
+const temporaryRedirects = require("./temporaryRedirects.json");
+const permanentRedirects = require("./permanentRedirects.json");
+
 
 // Import Models
 const Admin = require("./models/Admin");
@@ -15,7 +18,7 @@ require('dotenv').config()
 const app = express();
 
 // Body parser
-app.use(express.json({limit: '50mb'}));
+app.use(express.json({ limit: '50mb' }));
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -32,6 +35,24 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Methods", "PUT, POST, PATCH, DELETE, GET");
     return res.status(200).json({});
   }
+  next();
+});
+
+// Redirection middleware
+
+app.use((req, res, next) => {
+  const { path } = req;
+  const temporaryRedirect = temporaryRedirects.find((redirection) => redirection.from === path);
+  const permanentRedirect = permanentRedirects.find((redirection) => redirection.from === path);
+
+  if (temporaryRedirect) {
+    return res.redirect(307, temporaryRedirect.to); // 302 for temporary redirect
+  }
+
+  if (permanentRedirect) {
+    return res.redirect(308, permanentRedirect.to); // 301 for permanent redirect
+  }
+
   next();
 });
 
