@@ -11,7 +11,8 @@ module.exports.createBrand = asyncHandler(async (req, res, next) => {
     const {
         name,
         image,
-        coverImage
+        coverImage,
+        description,
     } = req.body.brand;
 
     fieldValidation(name, next);
@@ -25,7 +26,8 @@ module.exports.createBrand = asyncHandler(async (req, res, next) => {
         name,
         image,
         slug,
-        coverImage
+        coverImage,
+        description
     }).catch( err => {
         console.log("error ", err);
     });
@@ -109,7 +111,7 @@ module.exports.updateBrand = asyncHandler(async (req, res, next) => {
         name,
         image,
         slug,
-        coverImage
+        coverImage,
     } = req.body.brand;
 
     fieldValidation(name, next);
@@ -124,7 +126,8 @@ module.exports.updateBrand = asyncHandler(async (req, res, next) => {
         name,
         image,
         slug,
-        coverImage
+        coverImage,
+        description
     }, {
         where: {
             id
@@ -139,6 +142,7 @@ module.exports.updateBrand = asyncHandler(async (req, res, next) => {
 });
 
 module.exports.getPopularCarBrand = asyncHandler(async (req, res, next) => {
+
     let where = {
         id: [44, 24, 66, 61, 21, 32, 28, 59, 57, 50, 45, 64]
     };
