@@ -146,7 +146,7 @@ module.exports.createBlog = asyncHandler(async (req, res, next) => {
 });
 
 module.exports.updateBlog = asyncHandler(async (req, res, next) => {
-    let {id} = req.params;
+    let { id } = req.params;
     let {
         title,
         metaTitle,
@@ -179,11 +179,20 @@ module.exports.updateBlog = asyncHandler(async (req, res, next) => {
 
     // let publishedAt = null
 
-    if (published) {
-        publishedAt = new Date()
-    } else {
-        publishedAt = null
+    let blog = await Blog.findByPk(id);
+    if (!blog) {
+        return res.status(404).json({ message: "Blog not found" });
     }
+
+    let originalPublishedState = blog.published;
+    publishedAt = blog.publishedAt;
+
+    if (published !== originalPublishedState) {
+        publishedAt = published ? new Date() : null;
+    }
+    // else {
+    //     publishedAt = null
+    // }
 
     // console.log(publishedAt);
 
@@ -401,7 +410,7 @@ module.exports.getAdminBlogById = asyncHandler(async (req, res, next) => {
 
     const { id } = req.params;
 
-    let blog = await Blog.findByPk(id, {raw: true});
+    let blog = await Blog.findByPk(id, { raw: true });
 
     blog.brands = await BlogBrand.findAll({
         where: {
@@ -621,7 +630,7 @@ module.exports.getBlogsTag = asyncHandler(async (req, res, next) => {
     let currentPage = query.currentPage ?? 1;
     let orderBy = query.orderBy ? [
         [query.orderBy, "ASC"]
-    ]: [];
+    ] : [];
     let where = {};
     if (query.search) {
         where.title = { [Op.iLike]: `%${query.search}%` }

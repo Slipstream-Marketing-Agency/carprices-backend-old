@@ -112,6 +112,7 @@ module.exports.updateBrand = asyncHandler(async (req, res, next) => {
         image,
         slug,
         coverImage,
+        description
     } = req.body.brand;
 
     fieldValidation(name, next);
