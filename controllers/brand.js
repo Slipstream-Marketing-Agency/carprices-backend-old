@@ -3,6 +3,9 @@ const asyncHandler = require("../middlewares/asyncHandler");
 const ErrorResponse = require("../util/errorResponse");
 const slugify = require("slugify");
 
+const CarBrandPopularModels = require('../models/CarBrandPopularModels');
+const Model = require("../models/Model");
+
 const redisClient = require("../util/caching");
 const CarBrand = require("../models/CarBrand");
 const moment = require("moment");
@@ -28,7 +31,7 @@ module.exports.createBrand = asyncHandler(async (req, res, next) => {
         slug,
         coverImage,
         description
-    }).catch( err => {
+    }).catch(err => {
         console.log("error ", err);
     });
 
@@ -75,18 +78,23 @@ module.exports.getAdminBrands = asyncHandler(async (req, res, next) => {
 });
 
 module.exports.getAdminBrandById = asyncHandler(async (req, res, next) => {
-
     const { id } = req.params;
 
-    let brand = await CarBrand.findOne({
+    const brand = await CarBrand.findByPk(id, { raw: true });
+    brand.popularModels = await CarBrandPopularModels.findAll({
         where: {
-            id
-        }
+            brandId: brand.id
+        },
+        raw: true
     });
+    brand.popularModels = await Promise.all(
+        brand.popularModels.map(async model => {
+            model = await Model.findByPk(model.modelId);
+            return model;
+        })
+    )
 
-    res
-        .status(200)
-        .json({ brand });
+    res.status(200).json({ brand });
 });
 
 module.exports.getCarBrandBySlug = asyncHandler(async (req, res, next) => {
@@ -112,35 +120,50 @@ module.exports.updateBrand = asyncHandler(async (req, res, next) => {
         image,
         slug,
         coverImage,
-        description
+        description,
+        popularModels, // Assuming the popularModels property is an array of modelIds
     } = req.body.brand;
 
     fieldValidation(name, next);
     fieldValidation(image, next);
     fieldValidation(slug, next);
 
-    // const slug = slugify(name, {
-    //     lower: true
-    // });
+    try {
+        // Update the brand record in the database
+        const brand = await CarBrand.update(
+            {
+                name,
+                image,
+                slug,
+                coverImage,
+                description,
+            },
+            {
+                where: {
+                    id,
+                },
+            }
+        );
 
-    const brand = await CarBrand.update({
-        name,
-        image,
-        slug,
-        coverImage,
-        description
-    }, {
-        where: {
-            id
-        }
-    }).catch( err => {
-        console.log("error ", err);
-    });
+        let carBrandPopularModels = popularModels.map(model => ({ brandId: id, modelId: model }));
 
-    await redisClient.del("brands");
+        await CarBrandPopularModels.destroy({
+            where: {
+                brandId: id
+            }
+        })
+        await CarBrandPopularModels.bulkCreate(carBrandPopularModels);
 
-    res.status(201).json({ brand });
+        await redisClient.del("brands");
+
+        res.status(201).json({ brand }); // Response includes the updated brand record
+    } catch (error) {
+        console.log("Error while updating brand:", error.message);
+        // Handle the error if necessary
+        return res.status(403).json({ message: error.message })
+    }
 });
+
 
 module.exports.getPopularCarBrand = asyncHandler(async (req, res, next) => {
 
