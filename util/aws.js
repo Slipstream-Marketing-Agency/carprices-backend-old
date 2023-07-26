@@ -1,6 +1,7 @@
 var aws = require("aws-sdk");
 var multer = require("multer");
 var multerS3 = require("multer-s3");
+const { default: slugify } = require("slugify");
 require("dotenv").config();
 var s3 = new aws.S3();
 const fileFilter = (req, file, cb) => {
@@ -40,7 +41,9 @@ module.exports = {
       key: function (req, file, cb) {
         if (req.query.path) path = req.query.path + "/";
         else path = "others/";
-        let fileName = path + Date.now().toString();
+        let fileName = path + slugify(file.originalname + " " + Math.floor(Math.random() * 9000 + 1000), {
+          lower: true
+        });
         cb(null, fileName + "." + file.originalname.split(".").pop());
       },
     }),
