@@ -41,7 +41,7 @@ module.exports = {
       key: function (req, file, cb) {
         if (req.query.path) path = req.query.path + "/";
         else path = "others/";
-        let fileName = path + slugify(file.originalname + " " + Math.floor(Math.random() * 9000 + 1000), {
+        let fileName = path + slugify(file.originalname.substring(0, file.originalname.lastIndexOf('.')) + " " + Math.floor(Math.random() * 9000 + 1000), {
           lower: true
         });
         cb(null, fileName + "." + file.originalname.split(".").pop());
