@@ -1,4 +1,4 @@
-const { where } = require("sequelize");
+const { where, Op, QueryTypes } = require("sequelize");
 const asyncHandler = require("../middlewares/asyncHandler");
 const CarBrand = require("../models/CarBrand");
 const ErrorResponse = require("../util/errorResponse");
@@ -10,6 +10,11 @@ const {
   appendTagList,
 } = require("../util/helpers");
 const redisClient = require("../util/caching");
+const sequelize = require("../util/database");
+const Model = require("../models/Model");
+const ContactForm = require("../models/ContactForm");
+const Trim = require("../models/Trim");
+const Newsletter = require("../models/Newsletter");
 
 const includeOptions = [
   // {
@@ -23,263 +28,217 @@ const includeOptions = [
 
 module.exports.getCarBrands = asyncHandler(async (req, res, next) => {
 
-  const cacheResults = await redisClient.get("carBrands");
-  if (cacheResults) {
-    isCached = true;
-    results = JSON.parse(cacheResults);
-    return res
-    .status(200)
-    .json(results);
-  } 
+  // const cacheResults = await redisClient.get("carBrands");
+  // if (cacheResults) {
+  //   isCached = true;
+  //   results = JSON.parse(cacheResults);
+  //   return res
+  //   .status(200)
+  //   .json(results);
+  // } 
+
+  const { query } = req;
+
+  let isAll = query.isAll ?? false;
+
+  let pageSize = query.pageSize ?? 10;
+  let currentPage = query.currentPage ?? 1;
+  let orderBy = query.orderBy ? [
+    [query.orderBy, "ASC"]
+  ] : null;
+  let where = {};
+  if (query.search) {
+    where.name = { [Op.iLike]: `%${query.search}%` }
+  }
+
+  let conditions = {
+    order: orderBy,
+    raw: true
+  };
+  if (!isAll) {
+    conditions = {
+      where,
+      limit: pageSize,
+      offset: (currentPage - 1) * pageSize,
+      order: orderBy,
+      raw: true
+    }
+  }
 
   let carBrands = { rows: [], count: 0 };
 
-  carBrands = await CarBrand.findAndCountAll();
+  carBrands = await CarBrand.findAndCountAll(conditions);
 
-  await redisClient.set("carBrands", JSON.stringify({ carBrands: carBrands.rows, carBrandsCount: carBrands.count }), {
-    EX: 60 * 60 * 24,
-    NX: true,
-  });
+  carBrands.rows = await Promise.all(
+    carBrands.rows.map(async brand => {
+      brand.modelCount = await Model.count({
+        where: {
+          brand: brand.id
+        }
+      })
+      return brand;
+    })
+  )
+
+  // await redisClient.set("carBrands", JSON.stringify({ carBrands: carBrands.rows, carBrandsCount: carBrands.count }), {
+  //   EX: 60 * 60 * 24,
+  //   NX: true,
+  // });
 
   res
     .status(200)
     .json({ carBrands: carBrands.rows, carBrandsCount: carBrands.count });
 });
 
-module.exports.getArticles = asyncHandler(async (req, res, next) => {
-  const { tag, author, favorited, limit = 20, offset = 0 } = req.query;
-  const { loggedUser } = req;
+module.exports.mainSearch = asyncHandler(async (req, res, next) => {
 
-  const searchOptions = {
-    include: [
-      {
-        model: Tag,
-        as: "tagLists",
-        attributes: ["name"],
-        through: { attributes: [] }, // ? this will remove the rows from the join table
-        // where: tag ? { name: tag } : {},
-        ...(tag && { where: { name: tag } }),
-      },
-      {
-        model: User,
-        as: "author",
-        attributes: { exclude: ["password", "email"] },
-        // where: author ? { username: author } : {},
-        ...(author && { where: { username: author } }),
-      },
-    ],
-    limit: parseInt(limit),
-    offset: parseInt(offset),
-    order: [["createdAt", "DESC"]],
-    distinct: true,
-  };
+  const { keyword } = req.params;
+  // let keyword = "Audi a7"
 
-  let articles = { rows: [], count: 0 };
+  console.log("keyword ", keyword);
 
-  if (favorited) {
-    const user = await User.findOne({ where: { username: favorited } });
-
-    articles.rows = await user.getFavorites(searchOptions);
-    articles.count = await user.countFavorites();
+  let first_word = ''
+  let second_word = ''
+  let words = keyword.split(" ")
+  console.log('www ', words);
+  if (words.length == 2) {
+    first_word = words[0] + '%'
+    second_word = words[1] + '%'
   } else {
-    articles = await Article.findAndCountAll(searchOptions);
+    first_word = words[0] + '%'
+    second_word = words[0] + '%'
   }
 
-  for (let article of articles.rows) {
-    const articleTags = await article.getTagLists();
-    // const articleTags = article.tagLists;
-    appendTagList(articleTags, article);
-    await appendFollowers(loggedUser, article);
-    await appendFavorites(loggedUser, article);
+  let searchBrand = await CarBrand.findAll({
+    where: {
+      [Op.or]: keyword.split(" ").map(word => ({
+        name: {
+          [Op.iLike]: word + "%"
+        }
+      }))
+    },
+    limit: 8,
+    raw: true
+  })
 
-    delete article.dataValues.Favorites;
+  searchBrand = searchBrand.map(item => ({ ...item, type: "brand" }))
+
+  let searchModelWithName = await Model.findAll({
+    attributes: ["id", "name", "slug", "brand", "highTrim"],
+    where: {
+      [Op.or]: keyword.split(" ").map(word => ({
+        name: {
+          [Op.iLike]: word + "%"
+        }
+      })),
+    },
+    limit: 8,
+    raw: true
+  })
+
+  let brandWhere = {
+    [Op.or]: searchBrand.map(brand => ({
+      brand: brand.id
+    })),
   }
-
-  res
-    .status(200)
-    .json({ articles: articles.rows, articlesCount: articles.count });
-});
-
-module.exports.createArticle = asyncHandler(async (req, res, next) => {
-  const { loggedUser } = req;
-
-  fieldValidation(req.body.article.title, next);
-  fieldValidation(req.body.article.description, next);
-  fieldValidation(req.body.article.body, next);
-
-  const { title, description, body, tagList } = req.body.article;
-  const slug = slugify(title, { lower: true });
-  const slugInDB = await Article.findOne({ where: { slug: slug } });
-  if (slugInDB) next(new ErrorResponse("Title already exists", 400));
-
-  const article = await Article.create({
-    title: title,
-    description: description,
-    body: body,
-  });
-
-  for (const tag of tagList) {
-    const tagInDB = await Tag.findByPk(tag.trim());
-
-    if (tagInDB) {
-      await article.addTagList(tagInDB);
-    } else if (tag.length > 2) {
-      const newTag = await Tag.create({ name: tag.trim() });
-      await article.addTagList(newTag);
+  if (searchModelWithName.length != 0) {
+    brandWhere.id = {
+      [Op.and]: searchModelWithName.map(model => ({
+        [Op.ne]: model.id
+      }))
     }
   }
-  delete loggedUser.dataValues.token;
 
-  article.dataValues.tagList = tagList;
-  article.setAuthor(loggedUser);
-  article.dataValues.author = loggedUser;
-  await appendFollowers(loggedUser, loggedUser);
-  await appendFavorites(loggedUser, article);
 
-  res.status(201).json({ article });
+  let searchModelWithBrand = await Model.findAll({
+    attributes: ["id", "name", "slug", "brand", "highTrim"],
+    where: brandWhere,
+    limit: 8,
+    raw: true
+  })
+
+  let searchModel = searchModelWithName.concat(searchModelWithBrand)
+
+  searchModel = await Promise.all(
+    searchModel.map(async model => {
+      model.brand = await CarBrand.findByPk(model.brand)
+      model.type = "model"
+      if (model.highTrim) {
+        model.mainTrim = await Trim.findByPk(model.highTrim, { attributes: ["id", "name", "slug", "mainSlug", "year"], raw: true });
+      } else {
+        model.mainTrim = await Trim.findOne({
+          attributes: ["id", "name", "slug", "mainSlug", "year"],
+          where: {
+            model: model.id,
+            published: true
+          },
+          raw: true
+        });
+      }
+      return model;
+    })
+  )
+
+
+  // let searchTrim = await sequelize.query(
+  //   'SELECT m.name as modelName, b.name as brandName, t.name as trimName, m.id as modelId, b.id as brandId, t.id as trimId, m.slug as modelSlug, b.slug as brandSlug, t.slug as trimSlug, * FROM trims as t, models as m, car_brands as b WHERE t.model = m.id AND m.brand = b.id AND (b.name ILIKE :search_name OR m.name ILIKE :search_name OR t.name ILIKE :search_name OR b.name ILIKE :first_word OR m.name ILIKE :second_word OR b.name ILIKE :second_word OR m.name ILIKE :first_word) LIMIT 5',
+  //   {
+  //     replacements: { search_name: keyword+'%', first_word, second_word },
+  //     type: QueryTypes.SELECT
+  //   }
+  // );
+
+  // searchTrim = searchTrim.map()
+
+  let search = searchBrand.concat(searchModel)
+
+  res.status(200).json({
+    search
+  })
+
 });
 
-module.exports.deleteArticle = asyncHandler(async (req, res, next) => {
-  const { slug } = req.params;
-  const { loggedUser } = req;
+module.exports.contactFormSubmit = asyncHandler(async (req, res, next) => {
+  const {
+    name,
+    email,
+    mobile,
+    subject,
+    message,
+  } = req.body.contact;
 
-  const article = await Article.findOne({
-    where: { slug: slug },
-    include: includeOptions,
+  await ContactForm.create({
+    name,
+    email,
+    mobile,
+    subject,
+    message,
   });
 
-  if (!article) next(new ErrorResponse("Article not found", 404));
-
-  if (article.authorId !== loggedUser.id)
-    return next(new ErrorResponse("Unauthorized", 401));
-
-  await article.destroy();
-
-  res.status(200).json({ article });
+  res.status(201).json({ message: "Contact form submitted" });
 });
 
-module.exports.updateArticle = asyncHandler(async (req, res, next) => {
-  const { slug } = req.params;
-  const { loggedUser } = req;
+module.exports.subscriptionFormSubmit = asyncHandler(async (req, res, next) => {
+  const {
+    email
+  } = req.body.subscription;
 
-  const article = await Article.findOne({
-    where: { slug: slug },
-    include: includeOptions,
-  });
+  let oldData = await Newsletter.findOne({
+    where: {
+      email
+    }
+  })
 
-  if (!article) next(new ErrorResponse("Article not found", 404));
-
-  if (article.authorId !== loggedUser.id)
-    return next(new ErrorResponse("Unauthorized", 401));
-
-  const { title, description, body } = req.body.article;
-
-  const slugInDB = await Article.findOne({
-    where: { slug: slugify(title ? title : article.title, { lower: true }) },
-  });
-
-  if (slugInDB && slugInDB.slug !== slug)
-    return next(new ErrorResponse("Title already exists", 400));
-
-  await article.update({
-    title: title ? title : article.title,
-    description: description ? description : article.description,
-    body: body ? body : article.body,
-  });
-
-  const articleTags = await article.getTagLists();
-  appendTagList(articleTags, article);
-  await appendFollowers(loggedUser, article);
-  await appendFavorites(loggedUser, article);
-
-  res.status(200).json({ article });
-});
-
-module.exports.articlesFeed = asyncHandler(async (req, res, next) => {
-  const { loggedUser } = req;
-
-  const { limit = 3, offset = 0 } = req.query;
-  const authors = await loggedUser.getFollowing();
-
-  const articles = await Article.findAndCountAll({
-    include: includeOptions,
-    limit: parseInt(limit),
-    offset: offset * limit,
-    order: [["createdAt", "DESC"]],
-    where: { authorId: authors.map((author) => author.id) },
-    distinct: true,
-  });
-
-  for (const article of articles.rows) {
-    const articleTags = await article.getTagLists();
-
-    appendTagList(articleTags, article);
-    await appendFollowers(loggedUser, article);
-    await appendFavorites(loggedUser, article);
+  if (oldData) {
+    res.status(403).json({ message: "Newsletter Already Subscribed" });
+    return
   }
 
-  res.json({ articles: articles.rows, articlesCount: articles.count });
-});
-
-module.exports.getArticle = asyncHandler(async (req, res, next) => {
-  const { loggedUser } = req;
-  const { slug } = req.params;
-
-  const article = await Article.findOne({
-    where: { slug: slug },
-    include: includeOptions,
+  await Newsletter.create({
+    email,
   });
 
-  if (!article) return next(new ErrorResponse("Article not found", 404));
-
-  const articleTags = await article.getTagLists();
-  appendTagList(articleTags, article);
-  await appendFollowers(loggedUser, article);
-  await appendFavorites(loggedUser, article);
-
-  res.status(200).json({ article });
-});
-
-module.exports.addFavoriteArticle = asyncHandler(async (req, res, next) => {
-  const { loggedUser } = req;
-  const { slug } = req.params;
-
-  const article = await Article.findOne({
-    where: { slug: slug },
-    include: includeOptions,
-  });
-
-  if (!article) return next(new ErrorResponse("Article not found", 404));
-
-  await loggedUser.addFavorite(article);
-
-  const articleTags = await article.getTagLists();
-  appendTagList(articleTags, article);
-  await appendFollowers(loggedUser, article);
-  await appendFavorites(loggedUser, article);
-
-  res.status(200).json({ article });
-});
-
-module.exports.deleteFavoriteArticle = asyncHandler(async (req, res, next) => {
-  const { loggedUser } = req;
-  const { slug } = req.params;
-
-  const article = await Article.findOne({
-    where: { slug: slug },
-    include: includeOptions,
-  });
-
-  if (!article) return next(new ErrorResponse("Article not found", 404));
-
-  await loggedUser.removeFavorite(article);
-
-  const articleTags = await article.getTagLists();
-  appendTagList(articleTags, article);
-  await appendFollowers(loggedUser, article);
-  await appendFavorites(loggedUser, article);
-
-  res.status(200).json({ article });
+  res.status(201).json({ message: "Newsletter Subscribed" });
 });
 
 const fieldValidation = (field, next) => {

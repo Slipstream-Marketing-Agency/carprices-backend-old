@@ -5,6 +5,9 @@ const dotenv = require("dotenv");
 const morgan = require("morgan");
 const colors = require("colors");
 const { errorHandler } = require("./middlewares/errorHandler");
+// const temporaryRedirects = require("./temporaryRedirects.json");
+// const permanentRedirects = require("./permanentRedirects.json");
+
 
 // Import Models
 const Admin = require("./models/Admin");
@@ -15,7 +18,7 @@ require('dotenv').config()
 const app = express();
 
 // Body parser
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -35,17 +38,51 @@ app.use((req, res, next) => {
   next();
 });
 
+// Redirection middleware
+
+// app.use((req, res, next) => {
+//   const { path } = req;
+//   const temporaryRedirect = temporaryRedirects.find((redirection) => redirection.from === path);
+//   const permanentRedirect = permanentRedirects.find((redirection) => redirection.from === path);
+
+//   if (temporaryRedirect) {
+//     return res.redirect(307, temporaryRedirect.to); // 302 for temporary redirect
+//   }
+
+//   if (permanentRedirect) {
+//     return res.redirect(308, permanentRedirect.to); // 301 for permanent redirect
+//   }
+
+//   next();
+// });
+
 // Route files
-const services = require("./routes/common");
+const common = require("./routes/common");
+const trims = require("./routes/trim");
+const models = require("./routes/model");
+const blogs = require("./routes/blog");
+const brands = require("./routes/brand");
+const webstories = require("./routes/webstory");
 const adminBrand = require("./routes/admin/brand");
 const admin = require("./routes/admin");
 const adminBlog = require("./routes/admin/blog");
+const adminModel = require("./routes/admin/model");
+const adminTrim = require("./routes/admin/trim");
+const adminWebstory = require("./routes/admin/webstory");
 
 // Mount routers
-app.use(services);
+app.use(common);
 app.use(admin);
+app.use("/trim", trims);
+app.use("/model", models);
+app.use("/blog", blogs)
+app.use("/brand", brands)
+app.use("/webstory", webstories)
 app.use("/admin/brand", adminBrand);
 app.use("/admin/blog", adminBlog);
+app.use("/admin/model", adminModel);
+app.use("/admin/trim", adminTrim);
+app.use("/admin/webstory", adminWebstory);
 
 const PORT = process.env.PORT || 8080;
 
