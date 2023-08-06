@@ -62,11 +62,13 @@ const trims = require("./routes/trim");
 const models = require("./routes/model");
 const blogs = require("./routes/blog");
 const brands = require("./routes/brand");
+const webstories = require("./routes/webstory");
 const adminBrand = require("./routes/admin/brand");
 const admin = require("./routes/admin");
 const adminBlog = require("./routes/admin/blog");
 const adminModel = require("./routes/admin/model");
 const adminTrim = require("./routes/admin/trim");
+const adminWebstory = require("./routes/admin/webstory");
 
 // Mount routers
 app.use(common);
@@ -75,10 +77,12 @@ app.use("/trim", trims);
 app.use("/model", models);
 app.use("/blog", blogs)
 app.use("/brand", brands)
+app.use("/webstory", webstories)
 app.use("/admin/brand", adminBrand);
 app.use("/admin/blog", adminBlog);
 app.use("/admin/model", adminModel);
 app.use("/admin/trim", adminTrim);
+app.use("/admin/webstory", adminWebstory);
 
 const PORT = process.env.PORT || 8080;
 
