@@ -24,6 +24,7 @@ const Slide = sequelize.define("slide", {
   },
 });
 
+
 const WebStory = sequelize.define("web_story", {
   mainTitle: {
     type: DataTypes.STRING,
